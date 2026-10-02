@@ -99,7 +99,6 @@ h1 { font: 400 clamp(32px, 6vw, 46px)/1.05 var(--font-display); margin: 0; text-
   font: 14.5px/1.6 var(--font-body);
   background: var(--bg); border: 1px solid var(--line); border-radius: 8px; padding: 14px 16px;
 }
-.body .ph { background: var(--warn-bg); color: var(--warn); border-radius: 3px; padding: 0 2px; }
 
 .actions { display: flex; flex-wrap: wrap; gap: 8px; }
 .btn {
@@ -134,13 +133,13 @@ h1 { font: 400 clamp(32px, 6vw, 46px)/1.05 var(--font-display); margin: 0; text-
   <header class="top">
     <div class="eyebrow">VEL LEES · pipeline twórców USA</div>
     <h1>Maile do twórców</h1>
-    <p class="lede">Spersonalizowane maile dla 17 kanałów, które mają wpisany adres w arkuszu. Wpisz swoje imię, a podpis uzupełni się we wszystkich mailach. Każdy mail możesz skopiować albo otworzyć jako gotowy szkic w Gmailu.</p>
+    <p class="lede">Spersonalizowane maile dla 17 kanałów, które mają wpisany adres w arkuszu. Maile są podpisane jako Mark. Imię możesz zmienić poniżej, a podpis zmieni się we wszystkich mailach. Każdy mail możesz skopiować albo otworzyć jako gotowy szkic w Gmailu.</p>
   </header>
 
   <form class="controls" id="controls" autocomplete="on">
     <div class="field">
       <label for="sender-name">Twoje imię (podpis)</label>
-      <input id="sender-name" name="sender-name" type="text" placeholder="np. Anna Kowalska">
+      <input id="sender-name" name="sender-name" type="text" placeholder="Mark">
     </div>
     <div class="field">
       <label for="sender-site">Strona lub Instagram (opcjonalnie)</label>
@@ -171,7 +170,7 @@ const MODE_NOTES = {
   fu1: "Follow-up 1 wyślij ok. 5–7 dni po pierwszym mailu, najlepiej jako odpowiedź w tym samym wątku: wtedy skopiuj samą treść.",
   fu2: "Follow-up 2 wyślij ok. tydzień po pierwszym follow-upie, też w tym samym wątku. To ostatnia wiadomość."
 };
-const NAME_PH = "[Your name]";
+const DEFAULT_NAME = "Mark";
 
 const store = {
   get(k) { try { return localStorage.getItem(k); } catch (e) { return null; } },
@@ -180,13 +179,13 @@ const store = {
 
 const nameInput = document.getElementById("sender-name");
 const siteInput = document.getElementById("sender-site");
-nameInput.value = store.get("vl-name") || "";
+nameInput.value = store.get("vl-name") || DEFAULT_NAME;
 siteInput.value = store.get("vl-site") || "";
 let mode = store.get("vl-mode") || "first";
 if (!FOLLOWUPS[mode] && mode !== "first") mode = "first";
 
 function compose(p) {
-  const name = nameInput.value.trim() || NAME_PH;
+  const name = nameInput.value.trim() || DEFAULT_NAME;
   const site = siteInput.value.trim();
   const sig = p.signoff + ",\n" + name + "\nVEL LEES" + (site ? "\n" + site : "");
   let subject = p.subject;
@@ -251,7 +250,6 @@ function render() {
     const { subject, text } = compose(p);
     const card = document.createElement("article");
     card.className = "card";
-    const bodyHtml = escapeHtml(text).split(escapeHtml(NAME_PH)).join('<span class="ph">' + escapeHtml(NAME_PH) + "</span>");
     card.innerHTML =
       '<div class="card-head">' +
         '<span class="rownum">#' + p.row + "</span>" +
@@ -268,7 +266,7 @@ function render() {
         '<dt>Do</dt><dd class="addr">' + escapeHtml(p.email) + '</dd><dd><button type="button" class="btn small" data-copy="to">Kopiuj</button></dd>' +
         '<dt>Temat</dt><dd class="subj">' + escapeHtml(subject) + '</dd><dd><button type="button" class="btn small" data-copy="subject">Kopiuj</button></dd>' +
       "</dl>" +
-      '<pre class="body">' + bodyHtml + "</pre>" +
+      '<pre class="body">' + escapeHtml(text) + "</pre>" +
       '<div class="actions">' +
         '<a class="btn primary" href="' + gmailUrl(p.email, subject, text) + '" target="_blank" rel="noopener">Otwórz w Gmailu</a>' +
         '<button type="button" class="btn" data-copy="body">Kopiuj treść</button>' +

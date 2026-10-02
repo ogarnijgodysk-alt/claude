@@ -4,7 +4,7 @@ import json
 from pathlib import Path
 
 HERE = Path(__file__).parent
-NAME = "[Your name]"
+NAME = "Mark"
 
 people = json.loads((HERE / "emails.json").read_text(encoding="utf-8"))
 
@@ -26,7 +26,7 @@ with open(HERE / "maile.csv", "w", newline="", encoding="utf-8") as f:
 
 lines = ["# VEL LEES – maile do twórców USA", "",
          f"{len(people)} maili dla kanałów z adresem w arkuszu `pipeline_tworcy_usa_vellees`. "
-         f"Zamień `{NAME}` na swoje imię.", ""]
+         f"Podpis: {NAME}.", ""]
 for p in people:
     lines += [f'## #{p["row"]} {p["channel"]} ({p["handle"]})', "",
               f'**Do:** {p["email"]}  ', f'**Temat:** {p["subject"]}', ""]

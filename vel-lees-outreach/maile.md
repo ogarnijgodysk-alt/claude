@@ -10,7 +10,7 @@
 ```
 Hi there,
 
-I came across Gypsy Cowgirl Tarot while looking for readers whose audience really trusts them, and your channel stood out.
+I came across Gypsy Cowgirl Tarot while looking for tarot readers on YouTube whose viewers really trust them, and your channel stood out.
 
 My name is Mark and I work with VEL LEES. We make tensor bracelets meant to be worn as an everyday protection and intention piece, the kind of thing you put on before opening up to other people's energy. You can see them here: https://vellees.com
 
@@ -80,7 +80,7 @@ vellees.com
 ```
 Hi Whimsy,
 
-The Oracle of Whimsy came up while I was looking for oracle readers with a close bond with their viewers, so I wanted to reach out personally.
+The Oracle of Whimsy came up while I was looking for oracle readers on YouTube with a close bond with their viewers, so I wanted to reach out personally.
 
 I'm Mark from VEL LEES. We make tensor bracelets worn as a personal protection and intention piece. The idea is simple: you set an intention on it and wear it as a reminder through the week. You can see them here: https://vellees.com
 
@@ -104,7 +104,7 @@ vellees.com
 ```
 Hi Kim,
 
-I came across Just Sayin Oracle Tarot while looking for tarot and oracle readers to work with in the US, and I'd love to introduce our brand.
+I came across Just Sayin Oracle Tarot while looking for tarot and oracle readers on YouTube to work with in the US, and I'd love to introduce our brand.
 
 I'm Mark from VEL LEES. We make tensor bracelets meant to be worn as a daily protection and intention piece. You can see them here: https://vellees.com
 
@@ -214,7 +214,7 @@ vellees.com
 ```
 Hi Tasha,
 
-Your channel came up while I was looking for spiritual guidance readers in the US, and I'd love to introduce our brand.
+Your channel came up while I was looking for tarot and spiritual guidance channels on YouTube in the US, and I'd love to introduce our brand.
 
 I'm Mark from VEL LEES. We make tensor bracelets worn as a personal protection and intention piece. You can see them here: https://vellees.com
 
@@ -236,7 +236,7 @@ vellees.com
 ```
 Hi there,
 
-I came across Beyond The Moon Readings while looking for US tarot readers, and your channel is exactly what we hoped to find.
+I came across Beyond The Moon Readings while looking for US tarot readers on YouTube, and your channel is exactly what we hoped to find.
 
 I'm Mark from VEL LEES. We make tensor bracelets designed as an everyday protection and intention piece. You can see them here: https://vellees.com
 
@@ -258,7 +258,7 @@ vellees.com
 ```
 Hi Maggie,
 
-I found your channel while looking for psychic tarot readers in the US, and I'd love to introduce VEL LEES.
+I found your channel while looking for psychic tarot readers on YouTube in the US, and I'd love to introduce VEL LEES.
 
 I'm Mark, and we make tensor bracelets worn as a personal protection and intention piece, a modern version of the charm many people carry for luck and protection. You can see them here: https://vellees.com
 

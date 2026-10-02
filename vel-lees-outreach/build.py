@@ -5,13 +5,14 @@ from pathlib import Path
 
 HERE = Path(__file__).parent
 NAME = "Mark"
+SITE = "vellees.com"
 
 people = json.loads((HERE / "emails.json").read_text(encoding="utf-8"))
 
 
 def full_text(p):
     body = p["body"].replace("{name}", NAME)
-    return f'{p["greeting"]}\n\n{body}\n\n{p["signoff"]},\n{NAME}\nVEL LEES'
+    return f'{p["greeting"]}\n\n{body}\n\n{p["signoff"]},\n{NAME}\nVEL LEES\n{SITE}'
 
 
 template = (HERE / "template.html").read_text(encoding="utf-8")

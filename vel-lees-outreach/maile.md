@@ -12,7 +12,7 @@ Hi there,
 
 I came across Gypsy Cowgirl Tarot while looking for readers whose audience really trusts them, and your channel stood out.
 
-My name is Mark and I work with VEL LEES. We make tensor bracelets meant to be worn as an everyday protection and intention piece, the kind of thing you put on before opening up to other people's energy.
+My name is Mark and I work with VEL LEES. We make tensor bracelets meant to be worn as an everyday protection and intention piece, the kind of thing you put on before opening up to other people's energy. You can see them here: https://vellees.com
 
 I'd love to send you one as a gift, no strings attached. If it ends up being part of your routine, we'd be glad to talk about a paid collaboration. One idea that fits your format: a pick-a-card reading where one pile is about protection, and you show how you carry that energy through the week.
 
@@ -21,6 +21,7 @@ If you'd like one, just reply with your shipping address and I'll send it over.
 Warmly,
 Mark
 VEL LEES
+vellees.com
 ```
 
 ## #3 Sterling Psychic Medium (@SterlingPsychicMedium)
@@ -33,7 +34,7 @@ Hi there,
 
 I'm reaching out because Sterling Psychic Medium is exactly the kind of channel we hoped to find: a working medium who talks directly with viewers.
 
-I'm Mark from VEL LEES. We make tensor bracelets designed as a personal protection piece for people who work with energy every day.
+I'm Mark from VEL LEES. We make tensor bracelets designed as a personal protection piece for people who work with energy every day. You can see them here: https://vellees.com
 
 Mediums often talk about what they do to stay grounded before and after a session. We'd love to send you a bracelet as a gift so you can see whether it fits into that ritual. There's no obligation to post anything.
 
@@ -44,6 +45,7 @@ Would you like one? Just reply with a shipping address and I'll take care of the
 Kind regards,
 Mark
 VEL LEES
+vellees.com
 ```
 
 ## #4 Psychic Medium Ray (@PsychicMediumRay)
@@ -56,7 +58,7 @@ Hi Ray,
 
 I found your channel while researching mediums who read for their audience on camera, and I'd love to introduce you to VEL LEES.
 
-I'm Mark, and we make tensor bracelets meant to be worn as a daily protection and intention piece. For someone who connects with spirit and with viewers' energy on camera, we think it could become a natural part of your preparation.
+I'm Mark, and we make tensor bracelets meant to be worn as a daily protection and intention piece. For someone who connects with spirit and with viewers' energy on camera, we think it could become a natural part of your preparation. You can see them here: https://vellees.com
 
 I'd like to send you one as a gift, with no obligation. If you enjoy wearing it, we'd be glad to talk about a paid collaboration, such as a short "how I protect my energy before a reading" segment, or a bracelet giveaway for viewers who comment on a reading.
 
@@ -65,6 +67,7 @@ Just reply with your shipping address if you'd like one.
 Best,
 Mark
 VEL LEES
+vellees.com
 ```
 
 ## #5 The Oracle of Whimsy (@TheOracleofWhimsy)
@@ -79,7 +82,7 @@ Hi Whimsy,
 
 The Oracle of Whimsy came up while I was looking for oracle readers with a close bond with their viewers, so I wanted to reach out personally.
 
-I'm Mark from VEL LEES. We make tensor bracelets worn as a personal protection and intention piece. The idea is simple: you set an intention on it and wear it as a reminder through the week.
+I'm Mark from VEL LEES. We make tensor bracelets worn as a personal protection and intention piece. The idea is simple: you set an intention on it and wear it as a reminder through the week. You can see them here: https://vellees.com
 
 We'd love to send you one as a gift, no strings attached. If it resonates, we could explore a paid collaboration. One idea: a weekly energy forecast where you set the intention for the week on the bracelet and invite viewers to do the same.
 
@@ -88,6 +91,7 @@ Would you like one? Just reply with your shipping address.
 Warmly,
 Mark
 VEL LEES
+vellees.com
 ```
 
 ## #6 Just Sayin Oracle Tarot (@JustSayinOracleTarot)
@@ -102,7 +106,7 @@ Hi Kim,
 
 I came across Just Sayin Oracle Tarot while looking for tarot and oracle readers to work with in the US, and I'd love to introduce our brand.
 
-I'm Mark from VEL LEES. We make tensor bracelets meant to be worn as a daily protection and intention piece.
+I'm Mark from VEL LEES. We make tensor bracelets meant to be worn as a daily protection and intention piece. You can see them here: https://vellees.com
 
 We'd like to send you one as a gift, with no obligation to post. If you like it, we'd be glad to talk about a paid collaboration. A format that could suit your channel: a pick-a-card reading where one card is about protection, followed by a simple way to keep that energy close during the week.
 
@@ -111,6 +115,7 @@ If you're interested, just reply with your shipping address.
 Thank you,
 Mark
 VEL LEES
+vellees.com
 ```
 
 ## #7 Teresa's Readings (@TeresasReadings)
@@ -123,7 +128,7 @@ Hi Teresa,
 
 You post readings so regularly that your viewers have a reason to come back every week, which is why I wanted to get in touch.
 
-I'm Mark from VEL LEES. We make tensor bracelets worn as a personal protection and intention piece.
+I'm Mark from VEL LEES. We make tensor bracelets worn as a personal protection and intention piece. You can see them here: https://vellees.com
 
 I'd love to send you one as a gift, no strings attached. If it feels right, we could set up a paid collaboration that fits your rhythm, such as a weekly reading where you set the intention of the week on the bracelet, or a giveaway for viewers who comment.
 
@@ -132,6 +137,7 @@ Just reply with your shipping address and I'll send it over.
 Warm regards,
 Mark
 VEL LEES
+vellees.com
 ```
 
 ## #8 Fourth Dimension Tarot (@FourthDimensionTarot)
@@ -144,7 +150,7 @@ Hi there,
 
 I came across Fourth Dimension Tarot while looking for US channels focused purely on tarot, and I'd love to introduce our brand.
 
-I'm Mark from VEL LEES. We make tensor bracelets designed as an everyday protection and intention piece.
+I'm Mark from VEL LEES. We make tensor bracelets designed as an everyday protection and intention piece. You can see them here: https://vellees.com
 
 We'd like to send you one as a gift, with no obligation to feature it. If you enjoy it, we'd be happy to talk about a paid collaboration. For example: a three-pile reading where the third pile is about protection and how to strengthen it day to day.
 
@@ -153,6 +159,7 @@ Would you like one? Just reply with a shipping address.
 Best wishes,
 Mark
 VEL LEES
+vellees.com
 ```
 
 ## #9 Celtic Tarot Sheila (@CelticTarotSheila)
@@ -165,7 +172,7 @@ Hi Sheila,
 
 The Celtic thread in your tarot readings caught my attention. It's very close to the world of amulets and protective charms that our product belongs to.
 
-I'm Mark from VEL LEES. We make tensor bracelets meant to be worn as a personal protection and intention piece, a modern take on a charm you carry with you.
+I'm Mark from VEL LEES. We make tensor bracelets meant to be worn as a personal protection and intention piece, a modern take on a charm you carry with you. You can see them here: https://vellees.com
 
 I'd love to send you one as a gift, no strings attached. If it resonates, we'd be glad to discuss a paid collaboration, maybe a reading on protection paired with how you'd use a worn charm in your own practice.
 
@@ -174,6 +181,7 @@ Just reply with your shipping address if you'd like one.
 Warmly,
 Mark
 VEL LEES
+vellees.com
 ```
 
 ## #10 Kathy Mamolen Psychic Medium (@kathymamolenpsychicmedium)
@@ -186,7 +194,7 @@ Hi Kathy,
 
 I found your channel while looking for practicing mediums who also offer their own sessions, and I'd love to introduce VEL LEES.
 
-I'm Mark, and we make tensor bracelets worn as a daily protection piece for people who work with energy, whether in sessions with clients or on camera.
+I'm Mark, and we make tensor bracelets worn as a daily protection piece for people who work with energy, whether in sessions with clients or on camera. You can see them here: https://vellees.com
 
 I'd like to send you one as a gift, with no obligation. If it becomes part of your routine, we'd be glad to talk about a paid collaboration, for example a short video on what you do to protect your energy before and after a session.
 
@@ -195,6 +203,7 @@ If you're open to it, just reply with your shipping address.
 Kind regards,
 Mark
 VEL LEES
+vellees.com
 ```
 
 ## #11 Tasha's Divine Guidance (@tashasdivineguidance7302)
@@ -207,7 +216,7 @@ Hi Tasha,
 
 Your channel came up while I was looking for spiritual guidance readers in the US, and I'd love to introduce our brand.
 
-I'm Mark from VEL LEES. We make tensor bracelets worn as a personal protection and intention piece.
+I'm Mark from VEL LEES. We make tensor bracelets worn as a personal protection and intention piece. You can see them here: https://vellees.com
 
 I'd love to send you one as a gift, no strings attached. If it feels aligned, we could work on a paid collaboration. One idea: a guidance reading for the week ahead, where you set that week's intention on the bracelet and invite viewers to do the same.
 
@@ -216,6 +225,7 @@ Just reply with your shipping address and I'll send one over.
 Blessings,
 Mark
 VEL LEES
+vellees.com
 ```
 
 ## #12 Beyond The Moon Readings (@BeyondTheMoonReadings)
@@ -228,7 +238,7 @@ Hi there,
 
 I came across Beyond The Moon Readings while looking for US tarot readers, and your channel is exactly what we hoped to find.
 
-I'm Mark from VEL LEES. We make tensor bracelets designed as an everyday protection and intention piece.
+I'm Mark from VEL LEES. We make tensor bracelets designed as an everyday protection and intention piece. You can see them here: https://vellees.com
 
 We'd love to send you one as a gift, with no obligation. If you like it, we'd be happy to talk about a paid collaboration. With the moon so central to your channel, a full moon intention ritual could be a natural fit, and it works as a format you can repeat every month.
 
@@ -237,6 +247,7 @@ Just reply with your shipping address if you'd like one.
 Warmly,
 Mark
 VEL LEES
+vellees.com
 ```
 
 ## #14 Irish Gypsy Psychic Tarot Reader (@IrishGypsyPsychicTarotReader)
@@ -249,7 +260,7 @@ Hi Maggie,
 
 I found your channel while looking for psychic tarot readers in the US, and I'd love to introduce VEL LEES.
 
-I'm Mark, and we make tensor bracelets worn as a personal protection and intention piece, a modern version of the charm many people carry for luck and protection.
+I'm Mark, and we make tensor bracelets worn as a personal protection and intention piece, a modern version of the charm many people carry for luck and protection. You can see them here: https://vellees.com
 
 I'd like to send you one as a gift, no strings attached. If it feels right, we'd be glad to talk about a paid collaboration, for example a protection reading or a giveaway for viewers who comment on one of your readings.
 
@@ -258,6 +269,7 @@ Just reply with your shipping address if you'd like one.
 Warm regards,
 Mark
 VEL LEES
+vellees.com
 ```
 
 ## #59 Witch N The Working (@WitchNTheWorking)
@@ -272,7 +284,7 @@ Hi there,
 
 With Samhain coming up, I wanted to reach out to Witch N The Working. Your channel is about the actual practice of the craft, which is exactly what we were looking for.
 
-I'm Mark from VEL LEES. We make tensor bracelets meant to be worn as a protection and intention piece, something you can carry on your body as part of a protection working.
+I'm Mark from VEL LEES. We make tensor bracelets meant to be worn as a protection and intention piece, something you can carry on your body as part of a protection working. You can see them here: https://vellees.com
 
 We'd love to send you one as a gift, with no obligation. If it resonates, we could set up a paid collaboration. A few ideas: a quick protection spell with a worn talisman, "layers of protection: candle, herb and something you wear", or a Samhain ritual.
 
@@ -281,6 +293,7 @@ If you'd like one, just reply with your shipping address.
 Warmly,
 Mark
 VEL LEES
+vellees.com
 ```
 
 ## #63 Ask Angels (Melanie Beckler) (@AskAngels)
@@ -295,7 +308,7 @@ Hi Melanie,
 
 Your work on Ask Angels around angelic guidance and protection is very close to what our brand is about, so I wanted to reach out.
 
-I'm Mark from VEL LEES. We make tensor bracelets worn as a personal protection and intention piece. For your audience, it could pair naturally with a short meditation asking the angels for protection.
+I'm Mark from VEL LEES. We make tensor bracelets worn as a personal protection and intention piece. For your audience, it could pair naturally with a short meditation asking the angels for protection. You can see them here: https://vellees.com
 
 I'd love to send you one as a gift, no strings attached. If it resonates, we'd be glad to talk about a paid collaboration on whatever terms suit you.
 
@@ -304,6 +317,7 @@ Just reply with a shipping address and I'll send it over.
 With gratitude,
 Mark
 VEL LEES
+vellees.com
 ```
 
 ## #67 INTENTION1111 (@INTENTION1111)
@@ -318,7 +332,7 @@ Hi there,
 
 Intention-setting is at the heart of your channel, and it's at the heart of what we do too, so I wanted to reach out.
 
-I'm Mark from VEL LEES. We make tensor bracelets meant to be worn as a daily intention and protection piece: you set an intention and wear it as a reminder.
+I'm Mark from VEL LEES. We make tensor bracelets meant to be worn as a daily intention and protection piece: you set an intention and wear it as a reminder. You can see them here: https://vellees.com
 
 We'd love to send you one as a gift, no obligation. If it resonates, we'd be happy to talk about a paid collaboration, such as a short video on setting a monthly intention.
 
@@ -327,6 +341,7 @@ Just reply with your shipping address if you'd like one.
 Best,
 Mark
 VEL LEES
+vellees.com
 ```
 
 ## #69 Be the Light of Your Own Healing (@bethelightofyourownhealing)
@@ -341,7 +356,7 @@ Hi Tricia,
 
 Your channel's message about being the light of your own healing fits the way we think about our product: a personal reminder, something you choose to wear for yourself.
 
-I'm Mark from VEL LEES. We make tensor bracelets meant to be worn as a daily protection and intention piece.
+I'm Mark from VEL LEES. We make tensor bracelets meant to be worn as a daily protection and intention piece. You can see them here: https://vellees.com
 
 I'd love to send you one as a gift, no strings attached. If it resonates, we could talk about a paid collaboration, for example a short closing ritual for a session where putting on the bracelet is the last step.
 
@@ -350,6 +365,7 @@ Just reply with your shipping address if you'd like one.
 Warmly,
 Mark
 VEL LEES
+vellees.com
 ```
 
 ## #73 Lee Harris Energy (@LeeHarrisEnergy)
@@ -364,7 +380,7 @@ Hello Lee Harris Energy team,
 
 I hope this reaches the right person. If partnerships are handled by someone else, I'd be grateful if you could forward this message.
 
-I'm Mark from VEL LEES. We make tensor bracelets worn as a personal energy protection and intention piece, and Lee's work on energy and channeling is very close to what our audience cares about.
+I'm Mark from VEL LEES. We make tensor bracelets worn as a personal energy protection and intention piece, and Lee's work on energy and channeling is very close to what our audience cares about. You can see them here: https://vellees.com
 
 We'd love to send Lee a bracelet as a gift, with no obligation. If it resonates, we'd welcome a conversation about a paid collaboration in whatever format works best for the channel, and we'd appreciate any details on your partnership terms.
 
@@ -373,4 +389,5 @@ Thank you for your time.
 Kind regards,
 Mark
 VEL LEES
+vellees.com
 ```

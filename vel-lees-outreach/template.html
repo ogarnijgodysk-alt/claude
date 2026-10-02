@@ -133,7 +133,7 @@ h1 { font: 400 clamp(32px, 6vw, 46px)/1.05 var(--font-display); margin: 0; text-
   <header class="top">
     <div class="eyebrow">VEL LEES · pipeline twórców USA</div>
     <h1>Maile do twórców</h1>
-    <p class="lede">Spersonalizowane maile dla 17 kanałów, które mają wpisany adres w arkuszu. Maile są podpisane jako Mark. Imię możesz zmienić poniżej, a podpis zmieni się we wszystkich mailach. Każdy mail możesz skopiować albo otworzyć jako gotowy szkic w Gmailu.</p>
+    <p class="lede">Spersonalizowane maile dla 17 kanałów, które mają wpisany adres w arkuszu. Maile są podpisane jako Mark, z linkiem do vellees.com w treści i w podpisie. Imię i stronę możesz zmienić poniżej, a zmiana obejmie wszystkie maile. Każdy mail możesz skopiować albo otworzyć jako gotowy szkic w Gmailu.</p>
   </header>
 
   <form class="controls" id="controls" autocomplete="on">
@@ -143,7 +143,7 @@ h1 { font: 400 clamp(32px, 6vw, 46px)/1.05 var(--font-display); margin: 0; text-
     </div>
     <div class="field">
       <label for="sender-site">Strona lub Instagram (opcjonalnie)</label>
-      <input id="sender-site" name="sender-site" type="text" placeholder="np. vellees.com">
+      <input id="sender-site" name="sender-site" type="text" placeholder="vellees.com">
     </div>
     <div class="seg" role="group" aria-label="Który mail pokazać">
       <button type="button" data-mode="first" aria-pressed="true">Pierwszy mail</button>
@@ -171,6 +171,7 @@ const MODE_NOTES = {
   fu2: "Follow-up 2 wyślij ok. tydzień po pierwszym follow-upie, też w tym samym wątku. To ostatnia wiadomość."
 };
 const DEFAULT_NAME = "Mark";
+const DEFAULT_SITE = "vellees.com";
 
 const store = {
   get(k) { try { return localStorage.getItem(k); } catch (e) { return null; } },
@@ -180,7 +181,7 @@ const store = {
 const nameInput = document.getElementById("sender-name");
 const siteInput = document.getElementById("sender-site");
 nameInput.value = store.get("vl-name") || DEFAULT_NAME;
-siteInput.value = store.get("vl-site") || "";
+siteInput.value = store.get("vl-site") || DEFAULT_SITE;
 let mode = store.get("vl-mode") || "first";
 if (!FOLLOWUPS[mode] && mode !== "first") mode = "first";
 

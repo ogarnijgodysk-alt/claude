@@ -7,7 +7,12 @@ HERE = Path(__file__).parent
 NAME = "Mark"
 SITE = "vellees.com"
 
-people = json.loads((HERE / "emails.json").read_text(encoding="utf-8"))
+source = json.loads((HERE / "emails.json").read_text(encoding="utf-8"))
+people = source["people"]
+# Shared paragraphs ({product}, {quote}) are expanded here; {name} stays for the page's sender field.
+for p in people:
+    for key, text in source["snippets"].items():
+        p["body"] = p["body"].replace("{" + key + "}", text)
 
 
 def full_text(p):

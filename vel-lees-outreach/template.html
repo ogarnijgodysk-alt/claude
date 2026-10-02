@@ -1,0 +1,291 @@
+<title>VEL LEES Outreach USA</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&family=Instrument+Serif&display=swap">
+<style>
+/* Layout: one working column of letter cards under a sticky control bar; copper accent nods to tensor bracelets. */
+:root {
+  --bg: #f4f3f6;
+  --surface: #ffffff;
+  --ink: #1d1a22;
+  --muted: #676270;
+  --line: #e1dee7;
+  --accent: #96492a;
+  --accent-ink: #ffffff;
+  --accent-soft: #f4e8e0;
+  --warn: #7a5300;
+  --warn-bg: #fbf0d6;
+  --warn-line: #ecd59a;
+  --font-display: "Instrument Serif", "Iowan Old Style", Georgia, serif;
+  --font-body: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+  --radius: 10px;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #131116; --surface: #1c1a21; --ink: #ece9f1; --muted: #a29cab; --line: #2e2a35;
+    --accent: #e39a70; --accent-ink: #1b120d; --accent-soft: #35241b;
+    --warn: #f1c86e; --warn-bg: #33290f; --warn-line: #5a4818;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #131116; --surface: #1c1a21; --ink: #ece9f1; --muted: #a29cab; --line: #2e2a35;
+  --accent: #e39a70; --accent-ink: #1b120d; --accent-soft: #35241b;
+  --warn: #f1c86e; --warn-bg: #33290f; --warn-line: #5a4818;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body {
+  background: var(--bg); color: var(--ink);
+  font: 15px/1.55 var(--font-body);
+  padding-inline: 16px; padding-block: 0 48px;
+}
+.wrap { max-width: 860px; margin: 0 auto; }
+header.top { padding-block: 32px 18px; display: grid; gap: 6px; }
+.eyebrow { font: 500 11px/1.2 var(--font-mono); letter-spacing: .12em; text-transform: uppercase; color: var(--accent); }
+h1 { font: 400 clamp(32px, 6vw, 46px)/1.05 var(--font-display); margin: 0; text-wrap: balance; }
+.lede { color: var(--muted); max-width: 62ch; margin: 4px 0 0; }
+
+.controls {
+  position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5;
+  background: color-mix(in srgb, var(--bg) 92%, transparent);
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid var(--line);
+  padding-block: 12px; margin-bottom: 18px;
+  display: flex; flex-wrap: wrap; gap: 12px 16px; align-items: end;
+}
+.field { display: grid; gap: 4px; flex: 1 1 200px; min-width: 0; }
+.field label { font: 500 11px/1.2 var(--font-mono); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+.field input {
+  font: inherit; color: var(--ink); background: var(--surface);
+  border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px; width: 100%;
+}
+.field input:focus-visible, button:focus-visible, a:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.seg { display: inline-flex; border: 1px solid var(--line); border-radius: 8px; overflow: hidden; background: var(--surface); flex: 0 0 auto; }
+.seg button {
+  font: 500 13px/1 var(--font-body); color: var(--muted); background: transparent;
+  border: 0; padding: 10px 12px; cursor: pointer;
+}
+.seg button + button { border-left: 1px solid var(--line); }
+.seg button[aria-pressed="true"] { background: var(--accent); color: var(--accent-ink); }
+
+.summary { display: flex; flex-wrap: wrap; gap: 8px 18px; color: var(--muted); font-size: 13px; margin-bottom: 14px; }
+.summary b { color: var(--ink); font-variant-numeric: tabular-nums; }
+.note { font-size: 13px; color: var(--muted); margin: 0 0 18px; max-width: 70ch; }
+
+.list { display: grid; gap: 16px; }
+.card {
+  background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius);
+  padding: 18px; display: grid; gap: 14px; min-width: 0;
+}
+.card-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 12px; }
+.rownum { font: 500 12px/1 var(--font-mono); color: var(--muted); font-variant-numeric: tabular-nums; }
+.name { font-weight: 600; font-size: 17px; }
+.handle { font: 13px/1 var(--font-mono); color: var(--accent); text-decoration: none; }
+.handle:hover { text-decoration: underline; }
+.chips { display: flex; gap: 6px; margin-left: auto; }
+.chip { font: 500 11px/1 var(--font-mono); padding: 5px 7px; border-radius: 999px; border: 1px solid var(--line); color: var(--muted); white-space: nowrap; }
+.chip.score { border-color: transparent; background: var(--accent-soft); color: var(--accent); font-variant-numeric: tabular-nums; }
+.chip.warn { border-color: var(--warn-line); background: var(--warn-bg); color: var(--warn); }
+
+.meta { display: grid; grid-template-columns: auto 1fr auto; gap: 8px 12px; align-items: center; }
+.meta dt { font: 500 11px/1.2 var(--font-mono); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+.meta dd { margin: 0; min-width: 0; overflow-wrap: anywhere; }
+.addr { font-family: var(--font-mono); font-size: 14px; }
+
+.body {
+  white-space: pre-wrap; overflow-wrap: anywhere; margin: 0;
+  font: 14.5px/1.6 var(--font-body);
+  background: var(--bg); border: 1px solid var(--line); border-radius: 8px; padding: 14px 16px;
+}
+.body .ph { background: var(--warn-bg); color: var(--warn); border-radius: 3px; padding: 0 2px; }
+
+.actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.btn {
+  font: 500 13px/1 var(--font-body); cursor: pointer; text-decoration: none;
+  border-radius: 8px; padding: 9px 12px; border: 1px solid var(--line);
+  background: var(--surface); color: var(--ink); display: inline-flex; align-items: center; gap: 6px;
+}
+.btn:hover { border-color: var(--accent); }
+.btn.primary { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+.btn.small { padding: 6px 9px; font-size: 12px; }
+.btn.done { border-color: var(--accent); color: var(--accent); }
+.btn.primary.done { color: var(--accent-ink); }
+
+.flag {
+  border: 1px solid var(--warn-line); background: var(--warn-bg); color: var(--warn);
+  border-radius: 8px; padding: 10px 12px; font-size: 13.5px;
+}
+.flag strong { font-weight: 600; }
+
+@media (max-width: 520px) {
+  .chips { margin-left: 0; }
+  .meta { grid-template-columns: 1fr auto; }
+  .meta dt { grid-column: 1 / -1; }
+  .controls { position: static; }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .btn { transition: border-color .15s, background-color .15s; }
+}
+</style>
+
+<div class="wrap">
+  <header class="top">
+    <div class="eyebrow">VEL LEES · pipeline twórców USA</div>
+    <h1>Maile do twórców</h1>
+    <p class="lede">Spersonalizowane maile dla 17 kanałów, które mają wpisany adres w arkuszu. Wpisz swoje imię, a podpis uzupełni się we wszystkich mailach. Każdy mail możesz skopiować albo otworzyć jako gotowy szkic w Gmailu.</p>
+  </header>
+
+  <form class="controls" id="controls" autocomplete="on">
+    <div class="field">
+      <label for="sender-name">Twoje imię (podpis)</label>
+      <input id="sender-name" name="sender-name" type="text" placeholder="np. Anna Kowalska">
+    </div>
+    <div class="field">
+      <label for="sender-site">Strona lub Instagram (opcjonalnie)</label>
+      <input id="sender-site" name="sender-site" type="text" placeholder="np. vellees.com">
+    </div>
+    <div class="seg" role="group" aria-label="Który mail pokazać">
+      <button type="button" data-mode="first" aria-pressed="true">Pierwszy mail</button>
+      <button type="button" data-mode="fu1" aria-pressed="false">Follow-up 1</button>
+      <button type="button" data-mode="fu2" aria-pressed="false">Follow-up 2</button>
+    </div>
+  </form>
+
+  <div class="summary" id="summary"></div>
+  <p class="note" id="mode-note"></p>
+
+  <div class="list" id="list"></div>
+</div>
+
+<script>
+const DATA = /*DATA*/;
+
+const FOLLOWUPS = {
+  fu1: "Just bringing my note below back to the top of your inbox in case it got buried. We'd still love to send {giftTo} a VEL LEES bracelet as a gift, with no obligation at all.\n\nIf you'd like one, a reply with your shipping address is all I need.",
+  fu2: "This is my last note, so I don't crowd your inbox. If a VEL LEES bracelet or a collaboration ever sounds interesting, just reply and I'll take it from there.\n\nWishing you all the best with the channel."
+};
+const MODE_NOTES = {
+  first: "Po wysłaniu wpisz w arkuszu Status i Datę kontaktu.",
+  fu1: "Follow-up 1 wyślij ok. 5–7 dni po pierwszym mailu, najlepiej jako odpowiedź w tym samym wątku: wtedy skopiuj samą treść.",
+  fu2: "Follow-up 2 wyślij ok. tydzień po pierwszym follow-upie, też w tym samym wątku. To ostatnia wiadomość."
+};
+const NAME_PH = "[Your name]";
+
+const store = {
+  get(k) { try { return localStorage.getItem(k); } catch (e) { return null; } },
+  set(k, v) { try { localStorage.setItem(k, v); } catch (e) {} }
+};
+
+const nameInput = document.getElementById("sender-name");
+const siteInput = document.getElementById("sender-site");
+nameInput.value = store.get("vl-name") || "";
+siteInput.value = store.get("vl-site") || "";
+let mode = store.get("vl-mode") || "first";
+if (!FOLLOWUPS[mode] && mode !== "first") mode = "first";
+
+function compose(p) {
+  const name = nameInput.value.trim() || NAME_PH;
+  const site = siteInput.value.trim();
+  const sig = p.signoff + ",\n" + name + "\nVEL LEES" + (site ? "\n" + site : "");
+  let subject = p.subject;
+  let body;
+  if (mode === "first") {
+    body = p.body;
+  } else {
+    subject = "Re: " + p.subject;
+    body = FOLLOWUPS[mode].replace("{giftTo}", p.giftTo || "you");
+  }
+  body = body.split("{name}").join(name);
+  const text = p.greeting + "\n\n" + body + "\n\n" + sig;
+  return { subject, text };
+}
+
+function gmailUrl(to, subject, text) {
+  return "https://mail.google.com/mail/?view=cm&fs=1&to=" + encodeURIComponent(to) +
+    "&su=" + encodeURIComponent(subject) + "&body=" + encodeURIComponent(text);
+}
+
+function escapeHtml(s) {
+  return s.replace(/[&<>"]/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+}
+
+function flash(btn, label) {
+  const old = btn.dataset.label || btn.textContent;
+  btn.dataset.label = old;
+  btn.textContent = label;
+  btn.classList.add("done");
+  setTimeout(() => { btn.textContent = old; btn.classList.remove("done"); }, 1400);
+}
+
+function copyText(text, btn, fallbackEl) {
+  const fallback = () => {
+    if (fallbackEl) {
+      const r = document.createRange();
+      r.selectNodeContents(fallbackEl);
+      const sel = window.getSelection();
+      sel.removeAllRanges(); sel.addRange(r);
+      flash(btn, "Zaznaczono, wciśnij Ctrl+C");
+    }
+  };
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(text).then(() => flash(btn, "Skopiowano"), fallback);
+  } else {
+    fallback();
+  }
+}
+
+function render() {
+  document.querySelectorAll(".seg button").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.mode === mode)));
+  document.getElementById("mode-note").textContent = MODE_NOTES[mode];
+  const flagged = DATA.filter(p => p.flag).length;
+  document.getElementById("summary").innerHTML =
+    "<span><b>" + DATA.length + "</b> maili</span>" +
+    "<span><b>" + (DATA.length - flagged) + "</b> gotowych do wysłania</span>" +
+    "<span><b>" + flagged + "</b> do sprawdzenia przed wysłaniem</span>";
+
+  const list = document.getElementById("list");
+  list.innerHTML = "";
+  DATA.forEach(p => {
+    const { subject, text } = compose(p);
+    const card = document.createElement("article");
+    card.className = "card";
+    const bodyHtml = escapeHtml(text).split(escapeHtml(NAME_PH)).join('<span class="ph">' + escapeHtml(NAME_PH) + "</span>");
+    card.innerHTML =
+      '<div class="card-head">' +
+        '<span class="rownum">#' + p.row + "</span>" +
+        '<span class="name">' + escapeHtml(p.channel) + "</span>" +
+        '<a class="handle" href="https://www.youtube.com/' + encodeURI(p.handle) + '" target="_blank" rel="noopener">' + escapeHtml(p.handle) + "</a>" +
+        '<span class="chips">' +
+          '<span class="chip">' + escapeHtml(p.type) + "</span>" +
+          '<span class="chip score">' + p.score + "/10</span>" +
+          (p.flag ? '<span class="chip warn">sprawdź</span>' : "") +
+        "</span>" +
+      "</div>" +
+      (p.flag ? '<div class="flag"><strong>Uwaga:</strong> ' + escapeHtml(p.flag) + "</div>" : "") +
+      '<dl class="meta">' +
+        '<dt>Do</dt><dd class="addr">' + escapeHtml(p.email) + '</dd><dd><button type="button" class="btn small" data-copy="to">Kopiuj</button></dd>' +
+        '<dt>Temat</dt><dd class="subj">' + escapeHtml(subject) + '</dd><dd><button type="button" class="btn small" data-copy="subject">Kopiuj</button></dd>' +
+      "</dl>" +
+      '<pre class="body">' + bodyHtml + "</pre>" +
+      '<div class="actions">' +
+        '<a class="btn primary" href="' + gmailUrl(p.email, subject, text) + '" target="_blank" rel="noopener">Otwórz w Gmailu</a>' +
+        '<button type="button" class="btn" data-copy="body">Kopiuj treść</button>' +
+      "</div>";
+    const pre = card.querySelector(".body");
+    card.querySelector('[data-copy="to"]').addEventListener("click", e => copyText(p.email, e.currentTarget, card.querySelector(".addr")));
+    card.querySelector('[data-copy="subject"]').addEventListener("click", e => copyText(subject, e.currentTarget, card.querySelector(".subj")));
+    card.querySelector('[data-copy="body"]').addEventListener("click", e => copyText(text, e.currentTarget, pre));
+    list.appendChild(card);
+  });
+}
+
+document.getElementById("controls").addEventListener("submit", e => e.preventDefault());
+nameInput.addEventListener("input", () => { store.set("vl-name", nameInput.value); render(); });
+siteInput.addEventListener("input", () => { store.set("vl-site", siteInput.value); render(); });
+document.querySelectorAll(".seg button").forEach(b => b.addEventListener("click", () => {
+  mode = b.dataset.mode; store.set("vl-mode", mode); render();
+}));
+render();
+</script>

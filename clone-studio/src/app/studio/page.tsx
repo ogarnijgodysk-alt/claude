@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useState } from "react";
-import { api, usePolling } from "@/components/api";
+import { BROWSER_MODE, api, usePolling } from "@/components/api";
 import { ASPECT_CLASS, CloneAvatar, VideoPreview, kindLabel, sizeClass } from "@/components/media";
 import { appendText, DictateButton } from "@/components/DictateButton";
 import { Recorder, type Recording } from "@/components/Recorder";
@@ -291,7 +291,13 @@ function Studio() {
                 {video ? "Wygeneruj kolejne wideo" : "Generuj wideo"}
               </Button>
               {clone && clone.status !== "ready" && <p className="text-xs text-amber-700">Ten klon jeszcze się trenuje.</p>}
-              {clone?.demo && <p className="text-xs text-zinc-500">Klon w trybie demo — wideo będzie symulowanym podglądem. Dodaj HEYGEN_API_KEY i stwórz klona ponownie, aby renderować prawdziwe filmy.</p>}
+              {clone?.demo && (
+                <p className="text-xs text-zinc-500">
+                  {BROWSER_MODE
+                    ? "Wersja testowa — wideo jest symulowanym podglądem (zdjęcie klona + napisy + Twoje nagranie). W pełnej wersji renderują je kie.ai lub HeyGen."
+                    : "Klon w trybie demo — wideo będzie symulowanym podglądem. Dodaj KIE_API_KEY lub HEYGEN_API_KEY i stwórz klona ponownie, aby renderować prawdziwe filmy."}
+                </p>
+              )}
             </Card>
           </div>
         </div>

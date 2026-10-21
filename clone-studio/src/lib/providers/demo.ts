@@ -44,11 +44,6 @@ export function demoPortraitSvg(seed: string, label: string, aspect: "9:16" | "1
 </svg>`;
 }
 
-export function demoScript(topic: string, brandName: string) {
-  const intro = brandName ? `Cześć, tu ${brandName}.` : "Cześć!";
-  return `Temat na dziś: ${topic}. Większość ludzi popełnia tu ten sam błąd. ${intro} W 30 sekund pokażę Ci, jak zrobić to lepiej. Po pierwsze: zacznij od konkretu, nie od teorii. Po drugie: mierz efekty co tydzień. Po trzecie: nie rób wszystkiego sam — od tego jesteśmy my. Zapisz ten film i napisz w komentarzu, który punkt był dla Ciebie nowy.`;
-}
-
 /** Demo jobs finish after a short delay so the UI shows a realistic progress state. */
 export const DEMO_JOB_MS = 6000;
 

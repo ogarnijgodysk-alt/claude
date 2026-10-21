@@ -19,7 +19,7 @@ const DEFAULT_BRAND: Brand = {
 };
 
 function emptyDb(): Database {
-  return { brand: { ...DEFAULT_BRAND }, clones: [], videos: [], photos: [] };
+  return { brand: { ...DEFAULT_BRAND }, clones: [], videos: [], photos: [], assistants: [] };
 }
 
 async function load(): Promise<Database> {

@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { api } from "@/components/api";
+import { appendText, DictateButton } from "@/components/DictateButton";
 import { Recorder, type Recording } from "@/components/Recorder";
 import { Button, Card, ErrorNote, Field, Input, PageHeader, Segmented, Select, Textarea, cx } from "@/components/ui";
 import type { Brand, Clone, CloneKind } from "@/lib/types";
@@ -183,6 +184,7 @@ export default function NewClonePage() {
               <Field label="Opisz influencera" hint="Wygląd, wiek, styl, osobowość i o czym ma mówić. Postać jest fikcyjna — nie opisuj realnych, znanych osób.">
                 <Textarea value={personaPrompt} onChange={(e) => setPersonaPrompt(e.target.value)} rows={4} placeholder="np. Kobieta ok. 30 lat, krótkie ciemne włosy, minimalistyczny styl, ekspertka od zdrowego gotowania, ciepła i zabawna" />
               </Field>
+              <DictateButton onText={(t) => setPersonaPrompt((v) => appendText(v, t))} />
               <Button onClick={designInfluencer} loading={designing} disabled={!personaPrompt.trim()} variant="secondary">
                 ✦ Wygeneruj propozycje
               </Button>

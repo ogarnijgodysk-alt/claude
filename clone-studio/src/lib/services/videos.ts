@@ -1,9 +1,11 @@
 import { newId, readDb, updateDb } from "../db";
-import { fileUrl, saveBuffer, saveUpload } from "../files";
+import { archiveRemote, fileUrl, publicFileUrl, saveBuffer, saveUpload } from "../files";
 import { demoJobDone } from "../providers/demo";
 import { hasElevenLabs, speak } from "../providers/elevenlabs";
 import { createVideo, getVideo, hasHeygen } from "../providers/heygen";
-import type { Brand, Clone, Platform, Video } from "../types";
+import { getTask, hasKie, startAvatarVideo } from "../providers/kie";
+import { finalCaption } from "../captions";
+import type { Clone, Platform, Video } from "../types";
 import { PLATFORMS } from "../types";
 
 export interface CreateVideoInput {
@@ -18,19 +20,41 @@ export interface CreateVideoInput {
   hashtags: string[];
 }
 
-export const AI_DISCLOSURE = "Treść wygenerowana z użyciem AI.";
 
-export function finalCaption(brand: Brand, caption: string) {
-  if (!brand.aiDisclosure || caption.includes(AI_DISCLOSURE)) return caption;
-  return `${caption.trim()}\n\n${AI_DISCLOSURE}`.trim();
+function canSpeakWithElevenLabs(clone: Clone) {
+  return clone.voice.provider === "elevenlabs" && Boolean(clone.voice.voiceId) && hasElevenLabs();
+}
+
+async function elevenLabsAudio(clone: Clone, script: string) {
+  return saveBuffer(await speak(clone.voice.voiceId!, script), "audio/mpeg", "tts");
+}
+
+/**
+ * Twins always render in HeyGen. Photo-based clones prefer kie.ai's Kling Avatar (cheaper per second),
+ * which needs an audio track: the user's recording or ElevenLabs speech in the clone's voice.
+ */
+function pickProvider(clone: Clone, input: CreateVideoInput): Video["provider"] | undefined {
+  const heygenReady = hasHeygen() && Boolean(clone.heygen?.avatarId);
+  if (clone.kind === "digital_twin") return heygenReady ? "heygen" : undefined;
+  const kieCanSpeak = input.mode === "voice" || canSpeakWithElevenLabs(clone);
+  if (hasKie() && (kieCanSpeak || !heygenReady)) return "kie";
+  return heygenReady ? "heygen" : undefined;
+}
+
+async function startKie(clone: Clone, input: CreateVideoInput, audioFile?: string) {
+  if (!audioFile) {
+    if (!canSpeakWithElevenLabs(clone)) {
+      throw new Error("Do renderu w kie.ai klon potrzebuje głosu ElevenLabs (próbka głosu) — albo użyj trybu „Mój głos”.");
+    }
+    audioFile = await elevenLabsAudio(clone, input.script);
+  }
+  const [imageUrl, audioUrl] = await Promise.all([publicFileUrl(clone.coverFile!), publicFileUrl(audioFile)]);
+  return { audioFile, jobId: await startAvatarVideo(imageUrl, audioUrl) };
 }
 
 async function heygenSpeech(clone: Clone, input: CreateVideoInput, audioFile?: string) {
   if (audioFile) return { audioFile };
-  if (clone.voice.provider === "elevenlabs" && clone.voice.voiceId && hasElevenLabs()) {
-    const mp3 = await speak(clone.voice.voiceId, input.script);
-    return { audioFile: await saveBuffer(mp3, "audio/mpeg", "tts") };
-  }
+  if (canSpeakWithElevenLabs(clone)) return { audioFile: await elevenLabsAudio(clone, input.script) };
   const voiceId =
     (clone.voice.provider === "heygen" ? clone.voice.voiceId : undefined) || process.env.HEYGEN_DEFAULT_VOICE_ID;
   if (!voiceId) {
@@ -60,21 +84,27 @@ export async function createCloneVideo(input: CreateVideoInput): Promise<Video> 
     caption: finalCaption(db.brand, input.caption),
     hashtags: input.hashtags.map((h) => h.replace(/^#/, "").trim()).filter(Boolean),
     status: "processing",
-    demo: clone.demo || !hasHeygen() || !clone.heygen?.avatarId,
+    provider: clone.demo ? undefined : pickProvider(clone, input),
+    demo: true,
     createdAt: new Date().toISOString(),
   };
+  video.demo = !video.provider;
   if (input.audio) video.audioFile = await saveUpload(input.audio, "rec");
 
   if (!video.demo) {
     try {
-      const speech = await heygenSpeech(clone, input, video.audioFile);
-      if (speech.audioFile) video.audioFile = speech.audioFile;
-      video.heygenVideoId = await createVideo({
-        avatarId: clone.heygen!.avatarId!,
-        title: video.title,
-        aspectRatio: video.aspectRatio,
-        ...speech,
-      });
+      if (video.provider === "kie") {
+        Object.assign(video, await startKie(clone, input, video.audioFile));
+      } else {
+        const speech = await heygenSpeech(clone, input, video.audioFile);
+        if (speech.audioFile) video.audioFile = speech.audioFile;
+        video.jobId = await createVideo({
+          avatarId: clone.heygen!.avatarId!,
+          title: video.title,
+          aspectRatio: video.aspectRatio,
+          ...speech,
+        });
+      }
     } catch (err) {
       video.status = "failed";
       video.error = err instanceof Error ? err.message : String(err);
@@ -87,31 +117,35 @@ export async function createCloneVideo(input: CreateVideoInput): Promise<Video> 
   return video;
 }
 
-/** Signed provider URLs expire, so finished renders are copied into our own storage. */
-async function archive(url: string) {
-  const res = await fetch(url);
-  if (!res.ok) return url;
-  const name = await saveBuffer(Buffer.from(await res.arrayBuffer()), res.headers.get("content-type") ?? "video/mp4", "video");
-  return fileUrl(name);
-}
-
 export async function refreshVideo(id: string): Promise<Video | undefined> {
   const current = (await readDb()).videos.find((v) => v.id === id);
   if (!current || current.status !== "processing") return current;
   const patch: Partial<Video> = {};
 
-  if (current.demo || !current.heygenVideoId) {
+  if (current.demo || !current.jobId) {
     if (demoJobDone(current.createdAt)) patch.status = "ready";
   } else {
     try {
-      const v = await getVideo(current.heygenVideoId);
-      if (v.state === "ready" && v.videoUrl) {
-        patch.status = "ready";
-        patch.videoUrl = await archive(v.videoUrl);
-        patch.thumbnailUrl = v.thumbnailUrl;
-      } else if (v.state === "failed") {
-        patch.status = "failed";
-        patch.error = v.error ?? "Renderowanie w HeyGen nie powiodło się.";
+      // Signed provider URLs expire, so finished renders are copied into our own storage.
+      if (current.provider === "kie") {
+        const job = await getTask(current.jobId);
+        if (job.status === "ready") {
+          patch.status = "ready";
+          patch.videoUrl = fileUrl(await archiveRemote(job.urls[0], "video/mp4", "video"));
+        } else if (job.status === "failed") {
+          patch.status = "failed";
+          patch.error = job.error;
+        }
+      } else {
+        const v = await getVideo(current.jobId);
+        if (v.state === "ready" && v.videoUrl) {
+          patch.status = "ready";
+          patch.videoUrl = fileUrl(await archiveRemote(v.videoUrl, "video/mp4", "video"));
+          patch.thumbnailUrl = v.thumbnailUrl;
+        } else if (v.state === "failed") {
+          patch.status = "failed";
+          patch.error = v.error ?? "Renderowanie w HeyGen nie powiodło się.";
+        }
       }
     } catch (err) {
       console.error(`refreshVideo ${id}:`, err);

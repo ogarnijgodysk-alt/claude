@@ -4,13 +4,14 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState, type ReactNode } from "react";
 import type { ProviderStatus } from "@/lib/providers/status";
-import { api } from "./api";
+import { BROWSER_MODE, api } from "./api";
 import { cx } from "./ui";
 
 const NAV = [
   { href: "/", label: "Pulpit", icon: "◎" },
   { href: "/klony", label: "Klony AI", icon: "◉" },
   { href: "/studio", label: "Studio nagrań", icon: "●" },
+  { href: "/asystent", label: "Asystent na stronę", icon: "◐" },
   { href: "/pomysly", label: "Plan treści", icon: "✦" },
   { href: "/sesja", label: "Sesje zdjęciowe", icon: "▣" },
   { href: "/biblioteka", label: "Biblioteka", icon: "▤" },
@@ -18,8 +19,18 @@ const NAV = [
   { href: "/ustawienia", label: "Integracje", icon: "⚙" },
 ];
 
+/** In browser-storage mode, stored files must be registered before anything renders them. */
+function useBrowserReady() {
+  const [ready, setReady] = useState(!BROWSER_MODE);
+  useEffect(() => {
+    if (BROWSER_MODE) import("@/lib/browser/backend").then((b) => b.ready()).then(() => setReady(true));
+  }, []);
+  return ready;
+}
+
 export function Shell({ children }: { children: ReactNode }) {
   const path = usePathname();
+  const ready = useBrowserReady();
   const [open, setOpen] = useState(false);
   const [status, setStatus] = useState<ProviderStatus | null>(null);
 
@@ -28,7 +39,11 @@ export function Shell({ children }: { children: ReactNode }) {
   }, []);
   useEffect(() => setOpen(false), [path]);
 
-  const demo = status && (!status.claude || !status.heygen || !status.fal);
+  if (!ready) return <div className="grid min-h-screen place-items-center text-sm text-zinc-400">Ładowanie…</div>;
+  // The website widget renders on its own, without the studio's navigation.
+  if (path.startsWith("/widget")) return <>{children}</>;
+
+  const demo = status && (status.browser || !status.claude || !status.heygen || !(status.kie || status.fal));
 
   return (
     <div className="min-h-screen md:flex">
@@ -67,7 +82,15 @@ export function Shell({ children }: { children: ReactNode }) {
         </nav>
         {demo && (
           <Link href="/ustawienia" className="mx-3 mb-4 block rounded-xl bg-amber-50 p-3 text-xs text-amber-800 ring-1 ring-amber-200">
-            <b>Tryb demo</b> dla części funkcji. Dodaj klucze API, aby generować prawdziwe klony i wideo →
+            {status?.browser ? (
+              <>
+                <b>Wersja testowa.</b> Dane zostają tylko w tej przeglądarce, wideo i zdjęcia są przykładowe →
+              </>
+            ) : (
+              <>
+                <b>Tryb demo</b> dla części funkcji. Dodaj klucze API, aby generować prawdziwe klony i wideo →
+              </>
+            )}
           </Link>
         )}
       </aside>

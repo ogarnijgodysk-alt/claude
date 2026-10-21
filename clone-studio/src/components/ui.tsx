@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useEffect, useState } from "react";
 import type { ButtonHTMLAttributes, InputHTMLAttributes, ReactNode, SelectHTMLAttributes, TextareaHTMLAttributes } from "react";
 import type { JobStatus } from "@/lib/types";
 
@@ -135,5 +136,57 @@ export function Segmented<T extends string>({ value, onChange, options }: { valu
         </button>
       ))}
     </div>
+  );
+}
+
+/** Two-step destructive button: the first tap asks, the second does it. (Works where confirm() is blocked.) */
+export function ConfirmButton({ onConfirm, children, confirmLabel = "Na pewno? Usuń", className }: { onConfirm: () => void | Promise<void>; children: ReactNode; confirmLabel?: string; className?: string }) {
+  const [armed, setArmed] = useState(false);
+  const [busy, setBusy] = useState(false);
+  useEffect(() => {
+    if (!armed) return;
+    const t = setTimeout(() => setArmed(false), 4000);
+    return () => clearTimeout(t);
+  }, [armed]);
+  return (
+    <Button
+      variant={armed ? "danger" : "ghost"}
+      loading={busy}
+      className={className}
+      onClick={async () => {
+        if (!armed) return setArmed(true);
+        setBusy(true);
+        try {
+          await onConfirm();
+        } finally {
+          setBusy(false);
+          setArmed(false);
+        }
+      }}
+    >
+      {armed ? confirmLabel : children}
+    </Button>
+  );
+}
+
+/** Copies text; where the clipboard API is refused it asks the user to copy by hand. */
+export function CopyButton({ text, label = "Kopiuj", className }: { text: string; label?: string; className?: string }) {
+  const [state, setState] = useState<"idle" | "done" | "failed">("idle");
+  return (
+    <Button
+      variant="secondary"
+      className={className}
+      onClick={async () => {
+        try {
+          await navigator.clipboard.writeText(text);
+          setState("done");
+        } catch {
+          setState("failed");
+        }
+        setTimeout(() => setState("idle"), 2500);
+      }}
+    >
+      {state === "done" ? "✓ Skopiowano" : state === "failed" ? "Zaznacz i skopiuj ręcznie" : label}
+    </Button>
   );
 }

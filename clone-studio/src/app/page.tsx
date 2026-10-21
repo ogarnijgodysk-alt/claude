@@ -11,6 +11,7 @@ import { PLATFORMS } from "@/lib/types";
 const ACTIONS = [
   { href: "/klony/nowy", title: "Stwórz klona", text: "Cyfrowy bliźniak z nagrania, klon ze zdjęć albo wirtualny influencer.", tone: "from-brand-500 to-pink-500" },
   { href: "/studio", title: "Nagraj wideo klonem", text: "Wpisz lub wygeneruj skrypt — albo powiedz go swoim głosem.", tone: "from-sky-500 to-indigo-500" },
+  { href: "/asystent", title: "Klon na Twojej stronie", text: "Asystent wideo i głosowy rozmawia z klientami na stronie firmy.", tone: "from-emerald-500 to-teal-500" },
   { href: "/pomysly", title: "Zaplanuj tydzień treści", text: "AI przygotuje pomysły na filmy dopasowane do Twojej marki.", tone: "from-amber-500 to-rose-500" },
 ];
 
@@ -36,7 +37,7 @@ export default function Dashboard() {
     <>
       <PageHeader title={brand?.name ? `Cześć, ${brand.name} 👋` : "Witaj w CloneStudio"} subtitle="Twoje klony AI nagrywają treści do social mediów, kiedy Ty prowadzisz firmę." />
 
-      <div className="grid gap-4 md:grid-cols-3">
+      <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
         {ACTIONS.map((a) => (
           <Link key={a.href} href={a.href} className="group overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-zinc-200/70 transition hover:-translate-y-0.5 hover:shadow-md">
             <div className={`h-1.5 bg-gradient-to-r ${a.tone}`} />

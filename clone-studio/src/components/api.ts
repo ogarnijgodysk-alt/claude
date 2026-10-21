@@ -2,7 +2,21 @@
 
 import { useCallback, useEffect, useRef, useState } from "react";
 
-export async function api<T>(url: string, init?: RequestInit & { json?: unknown }): Promise<T> {
+/**
+ * "browser" keeps all data in the visitor's browser (IndexedDB) and calls the server only for
+ * stateless AI requests. Used for the public test deployment and the claude.ai preview.
+ */
+export const BROWSER_MODE = process.env.NEXT_PUBLIC_STORAGE === "browser";
+
+type Init = RequestInit & { json?: unknown };
+
+let backend: Promise<typeof import("@/lib/browser/backend")> | undefined;
+function browserBackend() {
+  return (backend ??= import("@/lib/browser/backend"));
+}
+
+export async function api<T>(url: string, init?: Init): Promise<T> {
+  if (BROWSER_MODE) return (await browserBackend()).handle<T>(url, init);
   const { json, ...rest } = init ?? {};
   const res = await fetch(url, {
     ...rest,
@@ -11,6 +25,14 @@ export async function api<T>(url: string, init?: RequestInit & { json?: unknown 
   const data = await res.json().catch(() => ({}));
   if (!res.ok) throw new Error((data as { error?: string }).error ?? `Błąd ${res.status}`);
   return data as T;
+}
+
+/** POSTs JSON and returns the audio reply, or null when the server says to use the device voice. */
+export async function apiAudio(url: string, json: unknown): Promise<Blob | null> {
+  if (BROWSER_MODE) return null;
+  const res = await fetch(url, { method: "POST", body: JSON.stringify(json), headers: { "content-type": "application/json" } });
+  if (res.status === 204 || !res.ok) return null;
+  return res.blob();
 }
 
 /**

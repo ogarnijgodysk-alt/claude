@@ -2,6 +2,7 @@ import { promises as fs } from "fs";
 import path from "path";
 import { DATA_DIR } from "./db";
 import { falUpload, hasFal } from "./providers/fal";
+import { hasKie, kieUpload } from "./providers/kie";
 
 export const UPLOAD_DIR = path.join(DATA_DIR, "uploads");
 
@@ -73,17 +74,25 @@ export function fileUrl(name: string) {
 }
 
 /**
- * URL a third-party API (HeyGen, fal) can download the file from.
- * Prefers this app's own public address; falls back to fal.ai storage.
+ * URL a third-party API (HeyGen, kie.ai, fal) can download the file from.
+ * Prefers this app's own public address; falls back to kie.ai or fal.ai temporary storage.
  */
 export async function publicFileUrl(name: string) {
   const base = process.env.PUBLIC_BASE_URL?.replace(/\/$/, "");
   if (base) return `${base}${fileUrl(name)}`;
-  if (hasFal()) {
+  if (hasKie() || hasFal()) {
     const { data, type } = await readStored(name);
+    if (hasKie()) return kieUpload(data, type, name);
     return falUpload(new Blob([new Uint8Array(data)], { type }));
   }
   throw new Error(
-    "Brak publicznego adresu dla plików. Ustaw PUBLIC_BASE_URL (np. adres wdrożenia lub tunel ngrok) albo FAL_KEY.",
+    "Brak publicznego adresu dla plików. Ustaw PUBLIC_BASE_URL (adres wdrożenia lub tunel ngrok) albo KIE_API_KEY / FAL_KEY.",
   );
+}
+
+/** Downloads a provider result (signed URLs expire) into our own storage. */
+export async function archiveRemote(url: string, fallbackType: string, prefix: string) {
+  const res = await fetch(url);
+  if (!res.ok) throw new Error(`Nie udało się pobrać wyniku (${res.status})`);
+  return saveBuffer(Buffer.from(await res.arrayBuffer()), res.headers.get("content-type") ?? fallbackType, prefix);
 }

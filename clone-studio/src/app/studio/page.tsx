@@ -5,9 +5,11 @@ import { useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useState } from "react";
 import { api, usePolling } from "@/components/api";
 import { ASPECT_CLASS, CloneAvatar, VideoPreview, kindLabel, sizeClass } from "@/components/media";
+import { appendText, DictateButton } from "@/components/DictateButton";
 import { Recorder, type Recording } from "@/components/Recorder";
+import { speak, stopSpeaking } from "@/components/voice";
 import { Button, Card, DemoBadge, Empty, ErrorNote, Field, Input, LinkButton, PageHeader, Segmented, Select, StatusBadge, Textarea, cx } from "@/components/ui";
-import type { Script } from "@/lib/providers/claude";
+import type { Script } from "@/lib/content";
 import { PLATFORMS, type Clone, type Platform, type Video } from "@/lib/types";
 
 const GOALS = ["zasięg i nowi obserwujący", "zaufanie i ekspertyza", "sprzedaż / promocja", "rekrutacja", "edukacja klientów"];
@@ -38,6 +40,7 @@ function Studio() {
   const [caption, setCaption] = useState("");
   const [hashtags, setHashtags] = useState("");
   const [onScreen, setOnScreen] = useState<string[]>([]);
+  const [listening, setListening] = useState(false);
   const [recording, setRecording] = useState<Recording | null>(null);
 
   const [submitting, setSubmitting] = useState(false);
@@ -170,7 +173,10 @@ function Studio() {
             <div className="space-y-3 rounded-xl bg-brand-50/60 p-4 ring-1 ring-brand-100">
               <p className="text-sm font-medium text-brand-700">✦ Asystent skryptów AI</p>
               <div className="grid gap-3 sm:grid-cols-4">
-                <Input className="sm:col-span-3" value={topic} onChange={(e) => setTopic(e.target.value)} placeholder="Temat, np. 3 błędy przy wyborze kredytu hipotecznego" />
+                <div className="flex gap-2 sm:col-span-3">
+                  <Input value={topic} onChange={(e) => setTopic(e.target.value)} placeholder="Temat, np. 3 błędy przy wyborze kredytu hipotecznego" />
+                  <DictateButton onText={(t) => setTopic((v) => appendText(v, t))} />
+                </div>
                 <Select value={seconds} onChange={(e) => setSeconds(Number(e.target.value))}>
                   {[15, 30, 45, 60, 90].map((s) => (
                     <option key={s} value={s}>
@@ -179,7 +185,10 @@ function Studio() {
                   ))}
                 </Select>
               </div>
-              <Input value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="Dodatkowe wskazówki (opcjonalnie): promocja, fakty, styl…" />
+              <div className="flex gap-2">
+                <Input value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="Dodatkowe wskazówki (opcjonalnie): promocja, fakty, styl…" />
+                <DictateButton onText={(t) => setNotes((v) => appendText(v, t))} />
+              </div>
               <Button variant="secondary" onClick={writeWithAi} loading={writing} disabled={!topic.trim()}>
                 {script ? "Napisz od nowa" : "Napisz skrypt z AI"}
               </Button>
@@ -191,6 +200,26 @@ function Studio() {
             <Field label={mode === "script" ? "Skrypt (tekst mówiony przez klona)" : "Tekst do promptera (opcjonalnie)"} hint={words ? `${words} słów · ok. ${Math.round(words / 2.4)} s` : undefined}>
               <Textarea value={script} onChange={(e) => setScript(e.target.value)} rows={7} placeholder="Wpisz, co ma powiedzieć klon — albo wygeneruj z AI powyżej." />
             </Field>
+            <div className="flex flex-wrap gap-2">
+              <DictateButton onText={(t) => setScript((v) => appendText(v, t))} />
+              {script.trim() && (
+                <Button
+                  variant="secondary"
+                  className="h-9 px-3"
+                  onClick={() => {
+                    if (listening) {
+                      stopSpeaking();
+                      setListening(false);
+                    } else {
+                      setListening(true);
+                      speak(script, "pl-PL").then(() => setListening(false));
+                    }
+                  }}
+                >
+                  {listening ? "■ Zatrzymaj" : "▶ Odsłuchaj skrypt"}
+                </Button>
+              )}
+            </div>
             {onScreen.length > 0 && (
               <div className="flex flex-wrap gap-2">
                 <span className="text-xs text-zinc-500">Napisy na ekran:</span>
@@ -206,6 +235,18 @@ function Studio() {
               <div className="space-y-2">
                 <p className="text-sm text-zinc-600">Powiedz tekst swoimi słowami — klon zsynchronizuje usta z Twoim nagraniem. Świetne, gdy chcesz zachować własną intonację, a nie chcesz stawać przed kamerą.</p>
                 <Recorder kind="audio" teleprompter={script || undefined} maxSeconds={180} onChange={setRecording} />
+                <label className="block text-xs text-zinc-500">
+                  …albo wgraj gotowe nagranie (mp3, m4a, wav):
+                  <input
+                    type="file"
+                    accept="audio/*"
+                    className="mt-1 block w-full text-xs"
+                    onChange={(e) => {
+                      const f = e.target.files?.[0];
+                      setRecording(f ? { blob: f, url: URL.createObjectURL(f), seconds: 0 } : null);
+                    }}
+                  />
+                </label>
               </div>
             )}
           </Card>

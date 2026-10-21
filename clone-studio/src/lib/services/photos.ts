@@ -1,8 +1,9 @@
 import { newId, readDb, updateDb } from "../db";
-import { fileUrl, publicFileUrl, saveBuffer, saveText } from "../files";
+import { archiveRemote, fileUrl, publicFileUrl, saveText } from "../files";
 import { demoJobDone, demoPortraitSvg } from "../providers/demo";
-import { hasFal, pollImages, startLoraImages, startPulidImage } from "../providers/fal";
-import type { AspectRatio, PhotoSet } from "../types";
+import { hasFal, pollImages, startLoraImages, startPulidImage, type ImageModel } from "../providers/fal";
+import { getTask, hasKie, startSceneEdit } from "../providers/kie";
+import type { AspectRatio, Clone, PhotoSet } from "../types";
 
 export const SCENES: Record<string, string> = {
   biuro: "professional headshot in a modern bright office, business casual outfit, soft window light",
@@ -23,6 +24,33 @@ export interface CreatePhotosInput {
   count: number;
 }
 
+/** The clone's own photos (or its cover) are the identity references for image editing models. */
+function referenceFiles(clone: Clone) {
+  const files = clone.photoFiles.length ? clone.photoFiles : clone.coverFile ? [clone.coverFile] : [];
+  return files.filter((f) => !f.endsWith(".svg")).slice(0, 4);
+}
+
+async function startJobs(clone: Clone, scenePrompt: string, aspect: AspectRatio, count: number): Promise<PhotoSet["jobs"]> {
+  // A trained LoRA (fal) still gives the best likeness, so it wins when it exists.
+  if (hasFal() && clone.fal?.loraUrl) {
+    const prompt = `photo of ${clone.fal.triggerWord} person, ${scenePrompt}, photorealistic, 85mm`;
+    return [{ provider: "fal", model: "lora", requestId: await startLoraImages(clone.fal.loraUrl, prompt, aspect, count) }];
+  }
+  const refs = referenceFiles(clone);
+  if (!refs.length) throw new Error("Klon nie ma zdjęcia referencyjnego.");
+  if (hasKie()) {
+    const urls = await Promise.all(refs.map(publicFileUrl));
+    const prompt = `Photo of the same person as in the reference images, keep the face, hair and identity exactly the same. Scene: ${scenePrompt}. Photorealistic, natural skin, professional photography.`;
+    const ids = await Promise.all(Array.from({ length: count }, () => startSceneEdit(urls, prompt, aspect)));
+    return ids.map((requestId) => ({ provider: "kie", model: "nano-banana-edit", requestId }));
+  }
+  const ref = await publicFileUrl(refs[0]);
+  const ids = await Promise.all(
+    Array.from({ length: count }, () => startPulidImage(ref, `portrait photo of a person, ${scenePrompt}, photorealistic`, aspect)),
+  );
+  return ids.map((requestId) => ({ provider: "fal", model: "pulid", requestId }));
+}
+
 export async function createPhotoSet(input: CreatePhotosInput): Promise<PhotoSet> {
   const clone = (await readDb()).clones.find((c) => c.id === input.cloneId);
   if (!clone) throw new Error("Nie znaleziono klona.");
@@ -37,31 +65,20 @@ export async function createPhotoSet(input: CreatePhotosInput): Promise<PhotoSet
     prompt: scenePrompt,
     aspect: input.aspect,
     status: "processing",
-    falJobs: [],
+    jobs: [],
     images: [],
-    demo: !hasFal(),
+    demo: !hasKie() && !hasFal(),
     createdAt: new Date().toISOString(),
   };
 
   try {
-    if (!hasFal()) {
+    if (set.demo) {
       for (let i = 0; i < count; i++) {
         const svg = demoPortraitSvg(`${set.id}${i}`, `${clone.name} · ${input.scene || "sesja"}`, input.aspect);
         set.images.push(fileUrl(await saveText(svg, "image/svg+xml", "shot")));
       }
-    } else if (clone.fal?.loraUrl) {
-      const prompt = `photo of ${clone.fal.triggerWord} person, ${scenePrompt}, photorealistic, 85mm`;
-      set.falJobs.push({ model: "lora", requestId: await startLoraImages(clone.fal.loraUrl, prompt, input.aspect, count) });
-    } else if (clone.coverFile) {
-      const ref = await publicFileUrl(clone.coverFile);
-      for (let i = 0; i < count; i++) {
-        set.falJobs.push({
-          model: "pulid",
-          requestId: await startPulidImage(ref, `portrait photo of a person, ${scenePrompt}, photorealistic`, input.aspect),
-        });
-      }
     } else {
-      throw new Error("Klon nie ma zdjęcia referencyjnego.");
+      set.jobs = await startJobs(clone, scenePrompt, input.aspect, count);
     }
   } catch (err) {
     set.status = "failed";
@@ -74,10 +91,13 @@ export async function createPhotoSet(input: CreatePhotosInput): Promise<PhotoSet
   return set;
 }
 
-async function archiveImage(url: string) {
-  const res = await fetch(url);
-  if (!res.ok) return url;
-  return fileUrl(await saveBuffer(Buffer.from(await res.arrayBuffer()), res.headers.get("content-type") ?? "image/jpeg", "shot"));
+async function pollJob(job: PhotoSet["jobs"][number]) {
+  if (job.provider === "kie") {
+    const r = await getTask(job.requestId);
+    return r.status === "ready" ? { status: "ready" as const, urls: r.urls } : r;
+  }
+  const r = await pollImages(job.model as ImageModel, job.requestId);
+  return r.status === "ready" ? { status: "ready" as const, urls: r.result as string[] } : r;
 }
 
 export async function refreshPhotoSet(id: string): Promise<PhotoSet | undefined> {
@@ -93,14 +113,14 @@ export async function refreshPhotoSet(id: string): Promise<PhotoSet | undefined>
     });
   }
 
-  const jobs = current.falJobs.map((j) => ({ ...j }));
+  const jobs = current.jobs.map((j) => ({ ...j }));
   const images = [...current.images];
   let error: string | undefined;
   for (const job of jobs.filter((j) => !j.done)) {
     try {
-      const res = await pollImages(job.model, job.requestId);
+      const res = await pollJob(job);
       if (res.status === "ready") {
-        for (const url of res.result as string[]) images.push(await archiveImage(url));
+        for (const url of res.urls) images.push(fileUrl(await archiveRemote(url, "image/png", "shot")));
         job.done = true;
       } else if (res.status === "failed") {
         job.done = true;
@@ -115,7 +135,7 @@ export async function refreshPhotoSet(id: string): Promise<PhotoSet | undefined>
   return updateDb((db) => {
     const p = db.photos.find((x) => x.id === id);
     if (!p) return p;
-    p.falJobs = jobs;
+    p.jobs = jobs;
     p.images = images;
     if (error) p.error = error;
     if (allDone) p.status = images.length ? "ready" : "failed";

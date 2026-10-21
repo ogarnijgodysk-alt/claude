@@ -1,11 +1,14 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
+import { browserFileUrl } from "@/lib/browser/registry";
 import type { AspectRatio, Clone, Video } from "@/lib/types";
+import { BROWSER_MODE } from "./api";
 import { cx } from "./ui";
 
 export function fileSrc(name?: string) {
-  return name ? `/api/files/${name}` : undefined;
+  if (!name) return undefined;
+  return BROWSER_MODE ? browserFileUrl(name) : `/api/files/${name}`;
 }
 
 export const ASPECT_CLASS: Record<AspectRatio, string> = {

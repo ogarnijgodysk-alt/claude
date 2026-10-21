@@ -4,7 +4,7 @@ import { useParams, useRouter } from "next/navigation";
 import { useState } from "react";
 import { api, usePolling } from "@/components/api";
 import { CloneAvatar, fileSrc, kindLabel } from "@/components/media";
-import { Button, Card, DemoBadge, ErrorNote, Input, LinkButton, PageHeader, Select, StatusBadge } from "@/components/ui";
+import { Button, Card, ConfirmButton, CopyButton, DemoBadge, ErrorNote, Input, LinkButton, PageHeader, Select, StatusBadge } from "@/components/ui";
 import type { Clone } from "@/lib/types";
 
 const VOICE_LABEL: Record<Clone["voice"]["provider"], string> = {
@@ -44,7 +44,6 @@ export default function CloneDetailPage() {
   const renewConsent = () => run("consent", async () => setData(await api<Clone>(`/api/clones/${id}/consent`, { method: "POST" })));
   const remove = () =>
     run("delete", async () => {
-      if (!confirm(`Usunąć klona „${clone.name}”? Wideo w bibliotece zostaną.`)) return;
       await api(`/api/clones/${id}`, { method: "DELETE" });
       router.push("/klony");
     });
@@ -89,9 +88,7 @@ export default function CloneDetailPage() {
                 <a href={clone.heygen!.consentUrl} target="_blank" rel="noreferrer" className="rounded-lg bg-amber-500 px-4 py-2 text-sm font-medium text-white hover:bg-amber-600">
                   Otwórz link zgody
                 </a>
-                <Button variant="secondary" onClick={() => navigator.clipboard.writeText(clone.heygen!.consentUrl!)}>
-                  Kopiuj link
-                </Button>
+                <CopyButton text={clone.heygen!.consentUrl!} label="Kopiuj link" />
                 <Button variant="ghost" onClick={renewConsent} loading={busy === "consent"}>
                   Wygeneruj nowy
                 </Button>
@@ -161,9 +158,9 @@ export default function CloneDetailPage() {
           )}
 
           <ErrorNote error={actionError} />
-          <Button variant="danger" onClick={remove} loading={busy === "delete"}>
+          <ConfirmButton onConfirm={remove} confirmLabel="Na pewno? Wideo w bibliotece zostaną">
             Usuń klona
-          </Button>
+          </ConfirmButton>
         </div>
       </div>
     </>

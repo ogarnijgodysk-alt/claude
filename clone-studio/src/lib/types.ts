@@ -80,7 +80,9 @@ export interface Video {
   caption: string;
   hashtags: string[];
   status: JobStatus;
-  heygenVideoId?: string;
+  /** Which service renders the video: HeyGen (twins, photo avatars) or kie.ai Kling Avatar (photo + audio). */
+  provider?: "heygen" | "kie";
+  jobId?: string;
   videoUrl?: string;
   thumbnailUrl?: string;
   demo: boolean;
@@ -95,11 +97,38 @@ export interface PhotoSet {
   scene: string;
   aspect: AspectRatio;
   status: JobStatus;
-  falJobs: { model: "lora" | "pulid"; requestId: string; done?: boolean }[];
+  jobs: { provider: "fal" | "kie"; model: string; requestId: string; done?: boolean }[];
   images: string[];
   demo: boolean;
   error?: string;
   createdAt: string;
+}
+
+/** A clone that talks with visitors on the company website (Tavus CVI or the built-in voice chat). */
+export interface Assistant {
+  id: string;
+  cloneId: string;
+  name: string;
+  greeting: string;
+  /** Offer, prices, FAQ, opening hours: what the assistant may tell visitors. */
+  knowledge: string;
+  /** Where to send people when the assistant can't help (phone, e-mail, booking link). */
+  handoff: string;
+  language: string;
+  tavus?: {
+    replicaId?: string;
+    replicaStatus?: JobStatus;
+    personaId?: string;
+    /** Hash of the persona-relevant fields, so edits recreate the Tavus persona. */
+    personaHash?: string;
+  };
+  error?: string;
+  createdAt: string;
+}
+
+export interface ChatMessage {
+  role: "user" | "assistant";
+  content: string;
 }
 
 export interface Database {
@@ -107,4 +136,5 @@ export interface Database {
   clones: Clone[];
   videos: Video[];
   photos: PhotoSet[];
+  assistants: Assistant[];
 }

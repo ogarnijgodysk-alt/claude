@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { appendText, DictateButton } from "@/components/DictateButton";
 import { api } from "@/components/api";
 import { Button, Card, ErrorNote, Field, Input, PageHeader, Textarea } from "@/components/ui";
 import type { Brand } from "@/lib/types";
@@ -50,6 +51,7 @@ export default function BrandPage() {
         <Field label="Czym się zajmujecie i co sprzedajecie" hint="Produkty, usługi, wyróżniki, fakty, które AI może bezpiecznie powtarzać.">
           <Textarea value={brand.description} onChange={(e) => set("description")(e.target.value)} rows={4} />
         </Field>
+        <DictateButton onText={(t) => set("description")(appendText(brand.description, t))} />
         <Field label="Grupa docelowa">
           <Textarea value={brand.audience} onChange={(e) => set("audience")(e.target.value)} rows={2} placeholder="np. właściciele małych firm 30–50 lat, którzy nie mają czasu na marketing" />
         </Field>

@@ -61,6 +61,7 @@ export function Recorder({
   useEffect(() => {
     if (state === "idle" || state === "done" || !streamRef.current) return;
     const ctx = new AudioContext();
+    ctx.resume().catch(() => undefined); // iOS creates it suspended outside a direct tap
     const analyser = ctx.createAnalyser();
     analyser.fftSize = 256;
     ctx.createMediaStreamSource(streamRef.current).connect(analyser);

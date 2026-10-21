@@ -1,9 +1,10 @@
 "use client";
 
 import { useState } from "react";
+import { appendText, DictateButton } from "@/components/DictateButton";
 import { api } from "@/components/api";
 import { Button, Card, ErrorNote, Field, Input, LinkButton, PageHeader, Select, cx } from "@/components/ui";
-import type { Ideas } from "@/lib/providers/claude";
+import type { Ideas } from "@/lib/content";
 import { PLATFORMS, type Platform } from "@/lib/types";
 
 const DAYS = ["Pon", "Wt", "Śr", "Czw", "Pt", "Sob", "Nd"];
@@ -47,7 +48,10 @@ export default function IdeasPage() {
           </Field>
           <div className="md:col-span-3">
             <Field label="Na czym się skupić (opcjonalnie)">
-              <Input value={focus} onChange={(e) => setFocus(e.target.value)} placeholder="np. premiera nowej usługi, Black Friday, rekrutacja handlowców" />
+              <div className="flex gap-2">
+                <Input value={focus} onChange={(e) => setFocus(e.target.value)} placeholder="np. premiera nowej usługi, Black Friday, rekrutacja handlowców" />
+                <DictateButton onText={(t) => setFocus((v) => appendText(v, t))} />
+              </div>
             </Field>
           </div>
         </div>

@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { api, usePolling } from "@/components/api";
 import { VideoPreview } from "@/components/media";
-import { Button, Card, DemoBadge, Empty, ErrorNote, LinkButton, PageHeader, StatusBadge } from "@/components/ui";
+import { Button, Card, ConfirmButton, DemoBadge, Empty, ErrorNote, LinkButton, PageHeader, StatusBadge } from "@/components/ui";
 import { PLATFORMS, type Clone, type Video } from "@/lib/types";
 
 export default function LibraryPage() {
@@ -17,13 +17,16 @@ export default function LibraryPage() {
 
   async function copy(v: Video) {
     const tags = v.hashtags.map((h) => `#${h}`).join(" ");
-    await navigator.clipboard.writeText([v.caption, tags].filter(Boolean).join("\n\n"));
+    try {
+      await navigator.clipboard.writeText([v.caption, tags].filter(Boolean).join("\n\n"));
+    } catch {
+      return;
+    }
     setCopied(v.id);
     setTimeout(() => setCopied(null), 1500);
   }
 
   async function remove(v: Video) {
-    if (!confirm(`Usunąć „${v.title}”?`)) return;
     await api(`/api/videos/${v.id}`, { method: "DELETE" });
     setData((videos ?? []).filter((x) => x.id !== v.id));
   }
@@ -61,9 +64,9 @@ export default function LibraryPage() {
                   Pobierz MP4
                 </a>
               )}
-              <Button variant="ghost" onClick={() => remove(v)} className="ml-auto px-3 py-1.5 text-xs">
+              <ConfirmButton onConfirm={() => remove(v)} className="ml-auto px-3 py-1.5 text-xs">
                 Usuń
-              </Button>
+              </ConfirmButton>
             </div>
           </Card>
         ))}

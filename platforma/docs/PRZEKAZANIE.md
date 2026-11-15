@@ -15,7 +15,7 @@
 | Klienci (wyszukiwanie, filtry, stronicowanie po 20, hurt, edycja dat) | gotowe | strony renderowane na 8 857 kontach; hurt sprawdzony tylko na poziomie kodu i renderu (patrz niżej) |
 | Import CSV/XLSX w tle z paskiem postępu | gotowe | CSV w Windows-1250 (1 203 wiersze), błędy i ostrzeżenia, XLSX w teście jednostkowym |
 | Kolejka e-mail, SMTP, tempo, token przy wysyłce | gotowe | cron + atrapa serwera SMTP (AUTH LOGIN) |
-| Pobieranie plików z CDN | gotowe, **nie sprawdzone na prawdziwym CDN** | atrapa serwera: pobrano, odrzucono HTML udający PDF i obcy typ, 403, idempotencja; prawdziwy `cdn.idealms.net` jest w tej sesji zablokowany |
+| Pobieranie plików z CDN | gotowe, sprawdzone na prawdziwym CDN | `cdn.idealms.net` wydaje pliki bez logowania: pobrano 195 z 195 unikalnych adresów (73 PDF, 66 JPG/JPEG, 54 PNG, 1 ZIP; ok. 367 MB), 0 odwołań do CDN w bazie po przepięciu; adresy `http://` są ponawiane przez `https://` |
 | Testy | `php tests/run.php` (57 asercji), scenariusze `tests/e2e/*.js` | |
 
 ## Decyzje podjęte z właścicielem
@@ -28,7 +28,7 @@
 
 ## Czego nie sprawdziłem (wprost)
 
-1. **Prawdziwe pliki z cdn.idealms.net**: ruch do tej domeny blokuje serwer pośredniczący tej sesji (odpowiedź „CONNECT tunnel failed, 403”, czyli nie 403 z samego CDN). Nie wiem więc, czy CDN wydaje pliki bez logowania. Skrypt `--probe` rozstrzygnie to na serwerze docelowym.
+1. **Pliki z innych domen** (obiblog.pl ok. 56 adresów, ogarnij-go.pl, ogarnijgo.pl i inne) nie są pobierane domyślnie; użyj `--hosts=...`.
 2. **Apache/LiteSpeed**: całość testowana na wbudowanym serwerze PHP. Reguły `.htaccess` (korzeń i `public/`) nie były uruchamiane na prawdziwym serwerze WWW; sprawdź po instalacji, że `config/` i `storage/` zwracają 403/404.
 3. **Prawdziwy dostawca SMTP**, STARTTLS i SPF/DKIM/DMARC: testowane tylko na atrapie bez szyfrowania.
 4. **Odtwarzanie Vimeo/YouTube**: w sesji brak dostępu do tych serwisów; sprawdzono tylko generowanie osadzenia (z hashem linków prywatnych). Wymaga dodania domeny w Vimeo.

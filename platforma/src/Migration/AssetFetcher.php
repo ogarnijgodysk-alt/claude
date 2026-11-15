@@ -116,6 +116,11 @@ final class AssetFetcher
                 continue;
             }
             $r = $this->download($url, $ext);
+            if (!$r['ok'] && str_starts_with($url, 'http://')) {
+                // część linków w treści jest bez szyfrowania: spróbuj wersji https
+                $r2 = $this->download('https://' . substr($url, 7), $ext, $url);
+                $r = $r2['ok'] ? $r2 : $r;
+            }
             if ($r['ok']) {
                 $this->stats['downloaded']++;
                 $consecutiveDenied = 0;
@@ -142,7 +147,7 @@ final class AssetFetcher
     }
 
     /** @return array{ok:bool,status:int,error:string,media?:array} */
-    private function download(string $url, string $ext): array
+    private function download(string $url, string $ext, ?string $sourceUrl = null): array
     {
         $tmp = tempnam(\App\Config::storage('tmp'), 'dl');
         $fh = fopen($tmp, 'wb');
@@ -171,7 +176,7 @@ final class AssetFetcher
                 return ['ok' => false, 'status' => $code, 'error' => 'zawartość nie pasuje do rozszerzenia .' . $ext . ' (np. strona HTML zamiast pliku)'];
             }
             $name = urldecode(basename((string)parse_url($url, PHP_URL_PATH)));
-            return ['ok' => true, 'status' => $code, 'error' => '', 'media' => Uploads::save($tmp, $name, $ext, $canon, $size, $url, false)];
+            return ['ok' => true, 'status' => $code, 'error' => '', 'media' => Uploads::save($tmp, $name, $ext, $canon, $size, $sourceUrl ?? $url, false)];
         } finally {
             @unlink($tmp);
         }

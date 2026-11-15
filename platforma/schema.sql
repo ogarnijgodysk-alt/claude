@@ -198,6 +198,7 @@ CREATE TABLE IF NOT EXISTS mail_queue (
   kind VARCHAR(30) NOT NULL,
   subject VARCHAR(300) NOT NULL,
   body_text MEDIUMTEXT NOT NULL,
+  body_html MEDIUMTEXT NULL,
   status ENUM('pending','sent','failed') NOT NULL DEFAULT 'pending',
   attempts TINYINT UNSIGNED NOT NULL DEFAULT 0,
   last_error VARCHAR(500) NULL,

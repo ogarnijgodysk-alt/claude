@@ -1,0 +1,18 @@
+# Przepisanie wszystkich żądań (poza istniejącymi plikami) na index.php
+Options -Indexes
+<IfModule mod_rewrite.c>
+RewriteEngine On
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^ index.php [L]
+</IfModule>
+<FilesMatch "\.(php|phtml|phar)$">
+  <IfModule mod_authz_core.c>
+    Require all denied
+  </IfModule>
+</FilesMatch>
+<FilesMatch "^(index|instalator)\.php$">
+  <IfModule mod_authz_core.c>
+    Require all granted
+  </IfModule>
+</FilesMatch>

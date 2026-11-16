@@ -29,6 +29,7 @@ final class PubligoImporter
             'admin_email' => 'latuszekmarek@gmail.com',
             'replace_content' => false,
             'skip_users' => false,
+            'only' => 'all', // all | courses | users
         ];
         $this->log = $log ?? static function (string $m): void {
         };
@@ -51,16 +52,30 @@ final class PubligoImporter
 
     public function run(): array
     {
-        foreach (self::requiredFiles() as $f) {
+        $need = match ($this->opts['only']) {
+            'courses' => ['kursy.json', 'quizy.json'],
+            'users' => ['kursanci.csv', 'dostepy.csv'],
+            default => self::requiredFiles(),
+        };
+        foreach ($need as $f) {
             if (!is_file($this->dir . '/' . $f)) {
                 throw new \RuntimeException('Brak pliku w paczce: ' . $f);
             }
         }
         $t0 = microtime(true);
-        $courseMap = $this->importCourses();
-        $this->importQuizzes();
-        $userMap = $this->opts['skip_users'] ? [] : $this->importUsers();
-        if (!$this->opts['skip_users']) {
+        $only = $this->opts['only'];
+        if ($only === 'users') {
+            $courseMap = array_column(Db::all('SELECT id, publigo_course_id FROM courses WHERE publigo_course_id IS NOT NULL'), 'id', 'publigo_course_id');
+            if (!$courseMap) {
+                throw new \RuntimeException('Najpierw zaimportuj kursy (--only=courses): w bazie nie ma kursów z Publigo.');
+            }
+            $courseMap = array_map('intval', $courseMap);
+        } else {
+            $courseMap = $this->importCourses();
+            $this->importQuizzes();
+        }
+        $userMap = ($this->opts['skip_users'] || $only === 'courses') ? [] : $this->importUsers();
+        if (!$this->opts['skip_users'] && $only !== 'courses') {
             $this->importEnrollments($courseMap, $userMap);
         }
         $this->stats['seconds'] = round(microtime(true) - $t0, 1);

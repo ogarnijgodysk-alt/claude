@@ -135,7 +135,8 @@ final class Report
         ];
 
         // --- konta ---
-        $users = self::csv($dir . '/kursanci.csv');
+        $hasUsers = is_file($dir . '/kursanci.csv') && is_file($dir . '/dostepy.csv');
+        $users = $hasUsers ? self::csv($dir . '/kursanci.csv') : [];
         $srcEmails = [];
         $nonSub = [];
         $badEmail = 0;
@@ -158,7 +159,7 @@ final class Report
         $nonSubOut = array_map(fn($x) => $x + ['rola_w_bazie' => $dbEmails[$x['email']] ?? 'brak'], $nonSub);
 
         // --- przypisania (porównanie zbiorów email+kurs, plus daty) ---
-        $acc = self::csv($dir . '/dostepy.csv');
+        $acc = $hasUsers ? self::csv($dir . '/dostepy.csv') : [];
         $srcPairs = [];
         $srcPerCourse = [];
         $expUnlimited = 0;
@@ -225,11 +226,15 @@ final class Report
         $add('Quizy', $qs['quizzes'], $qt['quizzes'], 'Quizy czekają na podpięcie w lekcjach (źródło nie wiąże ich z lekcjami).');
         $add('Pytania quizów', $qs['questions'], $qt['questions']);
         $add('Odpowiedzi quizów (pytania zamknięte)', $qs['answers'], $qt['answers']);
+        if ($hasUsers) {
         $add('Konta (poprawne, unikalne adresy)', count($srcEmails), count(array_intersect_key($srcEmails, $dbEmails)), "Wierszy w kursanci.csv: " . count($users) . ", błędnych adresów: $badEmail. W bazie jest razem " . count($dbEmails) . ' kont.');
         $add('Przypisania kursów', count($srcPairs), count(array_intersect_key($srcPairs, $dbPairs)), 'Porównanie par (e-mail, kurs).');
         $add('Przypisania bezterminowe', $expUnlimited, count($srcPairs) - (int)$dbLimited >= 0 ? (int)Db::val('SELECT COUNT(*) FROM enrollments en JOIN courses c ON c.id=en.course_id WHERE c.publigo_course_id IS NOT NULL AND en.expires_at IS NULL') : 0);
         $add('Przypisania z limitem czasu', $expLimited, (int)$dbLimited);
         $add('…w tym już wygasłe (na dziś)', $expExpired, (int)$dbExpired);
+        } else {
+            $rows[] = ['label' => 'Konta i przypisania', 'source' => '—', 'target' => '—', 'diff' => null, 'note' => 'Pominięte: w paczce nie ma jeszcze kursanci.csv i dostepy.csv (etap 2).'];
+        }
 
         // --- per kurs ---
         $dbCourse = [];

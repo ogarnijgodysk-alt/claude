@@ -38,7 +38,7 @@ final class Smtp
         $domain = substr(strrchr($from, '@') ?: '@localhost', 1);
         $h = [
             'Date: ' . date('r'),
-            'From: ' . $enc($fromName) . ' <' . $from . '>',
+            'From: ' . (preg_match('/[^\x20-\x7E]/', $fromName) ? $enc($fromName) : ('"' . addcslashes($fromName, '"\\') . '"')) . ' <' . $from . '>',
             'To: <' . $to . '>',
             'Subject: ' . $enc($subject),
             'Message-ID: <' . bin2hex(random_bytes(12)) . '@' . $domain . '>',
@@ -101,7 +101,10 @@ final class Smtp
             $data = preg_replace('/^\./m', '..', str_replace(["\r\n", "\n"], ["\n", "\r\n"], $msg));
             fwrite($this->fp, $data . "\r\n.\r\n");
             $this->expect(250);
-            $this->cmd('QUIT', 221);
+            try {
+                $this->cmd('QUIT', 221); // wiadomość jest już przyjęta; błąd QUIT nie może jej cofnąć
+            } catch (\Throwable) {
+            }
         } finally {
             if (is_resource($this->fp)) {
                 fclose($this->fp);

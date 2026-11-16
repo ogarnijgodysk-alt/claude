@@ -14,11 +14,7 @@ final class FilesController extends Base
         if ($user['role'] === 'admin') {
             return true;
         }
-        $courses = Db::all(
-            "SELECT DISTINCT m.course_id FROM blocks b JOIN lessons l ON l.id = b.lesson_id JOIN modules m ON m.id = l.module_id
-             WHERE (b.type IN ('file','image') AND b.data LIKE ?) OR (b.type = 'text' AND (b.content LIKE ? OR b.content LIKE ?))",
-            ['%"media_id":' . $mediaId . '%', '%/plik/' . $mediaId . '"%', '%/obraz/' . $mediaId . '"%']
-        );
+        $courses = array_map(fn($id) => ['course_id' => $id], Uploads::usage($mediaId)['courses']);
         foreach ($courses as $c) {
             if (Access::canEnter($user, (int)$c['course_id'])) {
                 return true;

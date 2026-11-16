@@ -18,7 +18,8 @@ final class ClientQuery
             array_push($p, $like, $like);
         }
         if ($cf === 'expired') {
-            $w[] = 'EXISTS (SELECT 1 FROM enrollments e WHERE e.user_id = u.id AND e.expires_at IS NOT NULL AND e.expires_at < CURDATE())';
+            $w[] = 'EXISTS (SELECT 1 FROM enrollments e WHERE e.user_id = u.id AND e.expires_at IS NOT NULL AND e.expires_at < ?)';
+            $p[] = today();
         } elseif ($cf === 'none') {
             $w[] = 'NOT EXISTS (SELECT 1 FROM enrollments e WHERE e.user_id = u.id)';
         } elseif (ctype_digit($cf) && (int)$cf > 0) {

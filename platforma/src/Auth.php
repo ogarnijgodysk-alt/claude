@@ -46,7 +46,7 @@ final class Auth
             }
         } else {
             // wyrównanie czasu odpowiedzi, gdy konto nie istnieje
-            password_verify($password, '$2y$10$abcdefghijklmnopqrstuuMJ5tVfV6sH1bqzZq1b1m0YQ1xLwB0aS');
+            self::hash($password); // ten sam koszt co weryfikacja prawdziwego hasha
         }
         if (!$ok) {
             Security::hit('login_email', $email);
@@ -107,19 +107,30 @@ final class Auth
     }
 
     /** Kolejkuje e-mail z linkiem. Dla zaproszeń token powstaje dopiero przy wysyłce (patrz MailQueue::flush). */
-    public static function sendInvite(int $userId, string $kind = 'reset', bool $inline = true): void
+    public static function sendInvite(int $userId, string $kind = 'reset', bool $inline = true): int
     {
         $u = Db::one('SELECT id, email, first_name FROM users WHERE id = ?', [$userId]);
         if (!$u) {
-            return;
+            return 0;
         }
         $ttl = max(10, (int)Settings::get('reset_ttl', '60'));
         $link = $kind === 'invite' ? '{{LINK}}' : abs_url('/haslo/' . self::issueToken($userId));
         [$subject, $text, $html] = Mail\Templates::passwordLink($u, $link, $ttl, $kind);
-        MailQueue::enqueue($userId, $u['email'], $kind, $subject, $text, $html);
+        $mid = MailQueue::enqueue($userId, $u['email'], $kind, $subject, $text, $html);
         if ($inline) {
-            MailQueue::flush(1, true);
+            // wysyłka dopiero po odesłaniu odpowiedzi, żeby czas nie zdradzał istnienia konta
+            register_shutdown_function(static function () use ($mid): void {
+                ignore_user_abort(true);
+                if (function_exists('fastcgi_finish_request')) {
+                    fastcgi_finish_request();
+                }
+                try {
+                    MailQueue::flush(1, true, [$mid]);
+                } catch (\Throwable) {
+                }
+            });
         }
+        return $mid;
     }
 
     public static function findReset(string $token): ?array

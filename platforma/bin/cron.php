@@ -15,8 +15,13 @@ use App\{Db, Security, Settings};
 use App\Jobs\ClientImport;
 use App\Mail\MailQueue;
 
-$lockFile = fopen(App\Config::storage('tmp') . '/cron.lock', 'c');
-if (!$lockFile || !flock($lockFile, LOCK_EX | LOCK_NB)) {
+@mkdir(App\Config::storage('tmp'), 0750, true);
+$lockFile = @fopen(App\Config::storage('tmp') . '/cron.lock', 'c');
+if (!$lockFile) {
+    fwrite(STDERR, "BŁĄD: nie można utworzyć blokady w storage/tmp (uprawnienia?)\n");
+    exit(1);
+}
+if (!flock($lockFile, LOCK_EX | LOCK_NB)) {
     exit(0); // poprzedni przebieg jeszcze trwa
 }
 $t0 = time();

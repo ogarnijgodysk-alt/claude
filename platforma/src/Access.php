@@ -37,7 +37,9 @@ final class Access
         if ($expiresAt === null || $expiresAt === '') {
             return ['state' => 'unlimited', 'days' => null, 'text' => 'Dostęp bezterminowy', 'cls' => 'muted', 'expired' => false];
         }
-        $days = (int)floor((strtotime($expiresAt . ' 12:00:00') - strtotime(today() . ' 12:00:00')) / 86400);
+        $d1 = new \DateTimeImmutable(today());
+        $d2 = new \DateTimeImmutable($expiresAt);
+        $days = (int)$d1->diff($d2)->format('%r%a');
         if ($days < 0) {
             return ['state' => 'expired', 'days' => $days, 'text' => 'Dostęp wygasł ' . fmt_date($expiresAt), 'cls' => 'bad', 'expired' => true];
         }

@@ -20,5 +20,8 @@ if (!is_file($cfgFile)) {
     $cfgFile = null;
 }
 \App\Config::load($cfgFile ? (require $cfgFile) : []);
+if (!\App\Config::get('debug', false)) {
+    ini_set('display_errors', '0');
+}
 date_default_timezone_set(\App\Config::get('timezone', 'Europe/Warsaw'));
 mb_internal_encoding('UTF-8');

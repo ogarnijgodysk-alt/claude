@@ -46,3 +46,7 @@
 * Daty dostępu przechowywane jako data (bez godziny); dostęp obowiązuje przez cały dzień daty końcowej.
 * Przycisk „Przedłuż dostęp”: bez płatności (poza zakresem). Otwiera adres z Ustawień albo e-mail do nadawcy.
 * Sortowanie hurtowe bez progu bezpieczeństwa: „Odbierz kurs” wymaga drugiego kliknięcia.
+
+## Przegląd kodu (niezależny, model Opus)
+
+Przegląd znalazł m.in. dostęp do cudzych plików przez dopasowanie prefiksu id (`/plik/5` wpuszczał do `57`), zaproszenia na stary adres po zmianie e-maila, różnicę czasu odpowiedzi przy resecie hasła, SSRF przez przekierowanie w pobieraniu plików, brak przedłużania wygasłych dostępów przy hurtowym przypisaniu i automatyczne zaliczanie quizów bez pytań zamkniętych. Wszystko poprawione i objęte testami lub ponownym sprawdzeniem; pozostałe drobne uwagi (strefa czasu, XLSX bez atrybutu `r`, nazwa nadawcy z przecinkiem, blokada crona, sprzątanie sesji) także.

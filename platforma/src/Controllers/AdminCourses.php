@@ -333,9 +333,10 @@ final class AdminCourses extends Base
         $b = Db::one('SELECT * FROM blocks WHERE id = ?', [$id]);
         Db::exec('DELETE FROM blocks WHERE id = ?', [$id]);
         if ($b && $b['data']) {
-            foreach ((array)(json_decode($b['data'], true)['images'] ?? [json_decode($b['data'], true)]) as $x) {
+            $d = json_decode($b['data'], true) ?: [];
+            foreach ((array)($d['images'] ?? [$d]) as $x) {
                 $mid = (int)($x['media_id'] ?? 0);
-                if ($mid && !Db::val('SELECT 1 FROM blocks WHERE data LIKE ? LIMIT 1', ['%"media_id":' . $mid . '%'])) {
+                if ($mid && !Uploads::usage($mid)['blocks']) {
                     Uploads::remove($mid);
                 }
             }

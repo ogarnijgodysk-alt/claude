@@ -80,17 +80,76 @@ final class AssetFetcher
         return ['ok' => $urls !== [] && $denied === 0 && count(array_filter($res, fn($r) => $r['status'] >= 200 && $r['status'] < 400)) > 0, 'denied' => $denied, 'results' => $res, 'total' => count($urls)];
     }
 
+    /**
+     * Pobiera adres z ręcznym śledzeniem przekierowań: tylko HTTP/HTTPS i tylko hosty z listy
+     * (brak SSRF przez przekierowanie na adresy wewnętrzne).
+     * @param resource|null $fh
+     * @return array{0:int,1:string,2:string} kod, typ, błąd
+     */
+    private function fetch(string $url, $fh, bool $nobody, int $timeout): array
+    {
+        for ($hop = 0; $hop <= 5; $hop++) {
+            $loc = '';
+            $ch = curl_init($url);
+            $opts = [
+                CURLOPT_FOLLOWLOCATION => false, CURLOPT_TIMEOUT => $timeout, CURLOPT_CONNECTTIMEOUT => 15, CURLOPT_USERAGENT => $this->extra['ua'],
+                CURLOPT_PROTOCOLS => CURLPROTO_HTTP | CURLPROTO_HTTPS, CURLOPT_REDIR_PROTOCOLS => CURLPROTO_HTTP | CURLPROTO_HTTPS,
+                CURLOPT_HEADERFUNCTION => function ($c, $h) use (&$loc) {
+                    if (stripos($h, 'location:') === 0) {
+                        $loc = trim(substr($h, 9));
+                    }
+                    return strlen($h);
+                },
+            ];
+            if ($nobody) {
+                $opts[CURLOPT_NOBODY] = true;
+                $opts[CURLOPT_RETURNTRANSFER] = true;
+            } else {
+                $max = (int)$this->extra['max_mb'] * 1048576;
+                $opts[CURLOPT_FILE] = $fh;
+                $opts[CURLOPT_NOPROGRESS] = false;
+                $opts[CURLOPT_PROGRESSFUNCTION] = fn($r, $dt, $dn) => $dn > $max ? 1 : 0;
+            }
+            curl_setopt_array($ch, $opts);
+            if (!$nobody) {
+                ftruncate($fh, 0);
+                rewind($fh);
+            }
+            curl_exec($ch);
+            $code = (int)curl_getinfo($ch, CURLINFO_RESPONSE_CODE);
+            $type = (string)curl_getinfo($ch, CURLINFO_CONTENT_TYPE);
+            $err = curl_error($ch);
+            curl_close($ch);
+            if ($code >= 300 && $code < 400 && $loc !== '') {
+                $next = $this->absolute($url, $loc);
+                if (!$this->wanted($next)) {
+                    return [0, '', 'przekierowanie poza dozwolone domeny: ' . $next];
+                }
+                $url = $next;
+                continue;
+            }
+            return [$code, $type, $err];
+        }
+        return [0, '', 'zbyt wiele przekierowań'];
+    }
+
+    private function absolute(string $base, string $loc): string
+    {
+        if (preg_match('#^https?://#i', $loc)) {
+            return $loc;
+        }
+        $p = parse_url($base);
+        $origin = ($p['scheme'] ?? 'https') . '://' . ($p['host'] ?? '') . (isset($p['port']) ? ':' . $p['port'] : '');
+        if (str_starts_with($loc, '/')) {
+            return $origin . $loc;
+        }
+        return $origin . rtrim(dirname((string)($p['path'] ?? '/')), '/') . '/' . $loc;
+    }
+
     /** @return array{0:int,1:string,2:string} */
     private function head(string $url): array
     {
-        $ch = curl_init($url);
-        curl_setopt_array($ch, [CURLOPT_NOBODY => true, CURLOPT_FOLLOWLOCATION => true, CURLOPT_MAXREDIRS => 5, CURLOPT_TIMEOUT => 20, CURLOPT_USERAGENT => $this->extra['ua'], CURLOPT_RETURNTRANSFER => true]);
-        curl_exec($ch);
-        $code = (int)curl_getinfo($ch, CURLINFO_RESPONSE_CODE);
-        $type = (string)curl_getinfo($ch, CURLINFO_CONTENT_TYPE);
-        $err = curl_error($ch);
-        curl_close($ch);
-        return [$code, $type, $err];
+        return $this->fetch($url, null, true, 20);
     }
 
     public function run(): array
@@ -149,19 +208,10 @@ final class AssetFetcher
     /** @return array{ok:bool,status:int,error:string,media?:array} */
     private function download(string $url, string $ext, ?string $sourceUrl = null): array
     {
+        @mkdir(\App\Config::storage('tmp'), 0750, true);
         $tmp = tempnam(\App\Config::storage('tmp'), 'dl');
-        $fh = fopen($tmp, 'wb');
-        $ch = curl_init($url);
-        $max = (int)$this->extra['max_mb'] * 1048576;
-        curl_setopt_array($ch, [
-            CURLOPT_FILE => $fh, CURLOPT_FOLLOWLOCATION => true, CURLOPT_MAXREDIRS => 5, CURLOPT_TIMEOUT => (int)$this->extra['timeout'],
-            CURLOPT_CONNECTTIMEOUT => 15, CURLOPT_USERAGENT => $this->extra['ua'], CURLOPT_FAILONERROR => false,
-            CURLOPT_NOPROGRESS => false, CURLOPT_PROGRESSFUNCTION => fn($r, $dt, $dn) => $dn > $max ? 1 : 0,
-        ]);
-        curl_exec($ch);
-        $code = (int)curl_getinfo($ch, CURLINFO_RESPONSE_CODE);
-        $err = curl_error($ch);
-        curl_close($ch);
+        $fh = fopen($tmp, 'w+b');
+        [$code, , $err] = $this->fetch($url, $fh, false, (int)$this->extra['timeout']);
         fclose($fh);
         try {
             if ($code < 200 || $code >= 300) {

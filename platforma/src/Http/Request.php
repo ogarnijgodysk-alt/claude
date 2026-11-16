@@ -69,7 +69,7 @@ final class Request
     {
         $ip = (string)($this->server['REMOTE_ADDR'] ?? '0.0.0.0');
         if (\App\Config::get('trust_proxy', false) && !empty($this->server['HTTP_X_FORWARDED_FOR'])) {
-            $ip = trim(explode(',', (string)$this->server['HTTP_X_FORWARDED_FOR'])[0]);
+            $ip = trim((string)end(array_map('trim', explode(',', (string)$this->server['HTTP_X_FORWARDED_FOR']))));
         }
         return filter_var($ip, FILTER_VALIDATE_IP) ? $ip : '0.0.0.0';
     }

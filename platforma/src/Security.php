@@ -29,6 +29,12 @@ final class Security
     public static function purge(): void
     {
         Db::exec('DELETE FROM rate_limits WHERE created_at < ?', [time() - 86400]);
+        // stare pliki sesji (hosting często wyłącza własne sprzątanie PHP)
+        foreach (glob(Config::storage('sessions') . '/sess_*') ?: [] as $f) {
+            if (@filemtime($f) < time() - 15 * 86400) {
+                @unlink($f);
+            }
+        }
         Db::exec('DELETE FROM password_resets WHERE expires_at < ? OR used_at IS NOT NULL AND used_at < ?', [date('Y-m-d H:i:s', time() - 86400 * 2), date('Y-m-d H:i:s', time() - 86400 * 2)]);
         Db::exec('DELETE FROM security_log WHERE created_at < ?', [date('Y-m-d H:i:s', time() - 86400 * 365)]);
     }

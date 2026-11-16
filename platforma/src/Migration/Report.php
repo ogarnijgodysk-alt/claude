@@ -198,7 +198,7 @@ final class Report
             }
         }
         $dbLimited = Db::val('SELECT COUNT(*) FROM enrollments en JOIN courses c ON c.id=en.course_id WHERE c.publigo_course_id IS NOT NULL AND en.expires_at IS NOT NULL');
-        $dbExpired = Db::val('SELECT COUNT(*) FROM enrollments en JOIN courses c ON c.id=en.course_id WHERE c.publigo_course_id IS NOT NULL AND en.expires_at < CURDATE()');
+        $dbExpired = Db::val('SELECT COUNT(*) FROM enrollments en JOIN courses c ON c.id=en.course_id WHERE c.publigo_course_id IS NOT NULL AND en.expires_at < ?', [today()]);
 
         // --- tabela główna ---
         $rows = [];

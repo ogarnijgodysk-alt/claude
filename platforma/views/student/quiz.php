@@ -25,7 +25,7 @@ $hints = ['single' => 'wybierz jedną', 'multi' => 'wybierz wszystkie poprawne',
       <?php endforeach;
         if ($showResult): ?>
           <?php if (!empty($det[$qid])): ?><div class="ok small"><?= icon('check') ?> Dobrze</div>
-          <?php else: ?><div class="bad small">Niepoprawnie. Poprawna odpowiedź: <?= e(implode('; ', array_map(fn($a) => $a['text'], array_filter($q['answers'], fn($a) => (int)$a['is_correct'] === 1)))) ?></div><?php endif; ?>
+          <?php else: ?><div class="bad small">Niepoprawnie.<?php if ($last['passed'] || !$canRetry): ?> Poprawna odpowiedź: <?= e(implode('; ', array_map(fn($a) => $a['text'], array_filter($q['answers'], fn($a) => (int)$a['is_correct'] === 1)))) ?><?php endif; ?></div><?php endif; ?>
         <?php endif;
       elseif ($q['type'] === 'text'): ?>
         <textarea class="in" rows="3" name="q[<?= $qid ?>]" aria-label="Twoja odpowiedź"<?= $showResult ? ' disabled' : '' ?>><?= e($given[$qid]['text'] ?? '') ?></textarea>
@@ -39,7 +39,7 @@ $hints = ['single' => 'wybierz jedną', 'multi' => 'wybierz wszystkie poprawne',
     <?php if ($showResult):
       $total = 0; foreach ($quiz['questions'] as $q) { if (Quiz::isAuto($q)) { $total++; } }
       $good = count(array_filter($det)); $manual = $nq - $total; ?>
-      <div class="qres <?= $last['passed'] ? 'pass' : 'fail' ?>" role="status">Wynik: <?= (int)$last['score_percent'] ?>%<?= $total ? ' (' . $good . ' z ' . $total . ' pytań zamkniętych)' : '' ?>. <?= $last['passed'] ? 'Quiz zaliczony.' : 'Próg zaliczenia to ' . (int)$quiz['pass_percent'] . '%.' . ($canRetry ? '' : ' Wykorzystano limit podejść.') ?><?= $manual ? ' Odpowiedzi do ręcznej oceny: ' . $manual . '.' : '' ?></div>
+      <div class="qres <?= $last['passed'] ? 'pass' : 'fail' ?>" role="status"><?php if ($last['score_percent'] === null): ?>Odpowiedzi czekają na ocenę ręczną. Wynik pojawi się po sprawdzeniu.<?php else: ?>Wynik: <?= (int)$last['score_percent'] ?>%<?= $total ? ' (' . $good . ' z ' . $total . ' pytań zamkniętych)' : '' ?>. <?= $last['passed'] ? 'Quiz zaliczony.' : 'Próg zaliczenia to ' . (int)$quiz['pass_percent'] . '%.' . ($canRetry ? '' : ' Wykorzystano limit podejść.') ?><?= $manual ? ' Odpowiedzi do ręcznej oceny: ' . $manual . '.' : '' ?><?php endif; ?></div>
       <?php if (!$last['passed'] && $canRetry): ?><div class="row"><a class="btn" href="?retry=<?= (int)$block['id'] ?>#quiz-<?= (int)$block['id'] ?>">Spróbuj ponownie</a></div><?php endif; ?>
     <?php elseif ($canRetry): ?>
       <div class="row"><button class="btn primary" type="submit">Sprawdź odpowiedzi</button></div>

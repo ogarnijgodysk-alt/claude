@@ -182,9 +182,9 @@ final class PubligoImporter
                 $this->issue($w['type'], $ctx + ['szczegoly' => $w['detail']]);
             }
             // stare adresy ?p=ID -> 301
-            Db::exec('INSERT IGNORE INTO redirects (old_path, target_type, target_id) VALUES (?, ?, ?)', ['/?p=' . $l['lesson_id'], 'lesson', $lid]);
+            Db::exec('INSERT INTO redirects (old_path, target_type, target_id) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE target_type = VALUES(target_type), target_id = VALUES(target_id)', ['/?p=' . $l['lesson_id'], 'lesson', $lid]);
         }
-        Db::exec('INSERT IGNORE INTO redirects (old_path, target_type, target_id) VALUES (?, ?, ?)', ['/?p=' . $c['course_post_id'], 'course', $cid]);
+        Db::exec('INSERT INTO redirects (old_path, target_type, target_id) VALUES (?, ?, ?) ON DUPLICATE KEY UPDATE target_type = VALUES(target_type), target_id = VALUES(target_id)', ['/?p=' . $c['course_post_id'], 'course', $cid]);
     }
 
     private function importQuizzes(): void
@@ -351,7 +351,7 @@ final class PubligoImporter
             $rows,
             500,
             'INSERT',
-            'ON DUPLICATE KEY UPDATE expires_at = VALUES(expires_at), legacy_progress = VALUES(legacy_progress), legacy_done = VALUES(legacy_done), legacy_total = VALUES(legacy_total)'
+            'ON DUPLICATE KEY UPDATE legacy_progress = VALUES(legacy_progress), legacy_done = VALUES(legacy_done), legacy_total = VALUES(legacy_total)'
         );
         $this->stats += $st;
         $this->log(sprintf('Przypisania: %d wierszy w źródle, %d zapisanych (bezterminowych %d, z limitem %d, w tym wygasłych %d)', $st['enroll_source_rows'], count($rows), $st['enroll_unlimited'], $st['enroll_limited'], $st['enroll_expired']));

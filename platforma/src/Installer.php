@@ -55,7 +55,8 @@ final class Installer
         $row = Db::one('SELECT id FROM users WHERE email = ?', [$email]);
         $hash = Auth::hash($password);
         if ($row) {
-            Db::update('users', ['role' => 'admin', 'password_hash' => $hash, 'session_version' => 1], 'id = ?', [$row['id']]);
+            Db::exec('UPDATE users SET session_version = session_version + 1 WHERE id = ?', [$row['id']]);
+            Db::update('users', ['role' => 'admin', 'password_hash' => $hash], 'id = ?', [$row['id']]);
             return (int)$row['id'];
         }
         return Db::insert('users', [
@@ -114,6 +115,7 @@ final class Installer
         $id = self::createAdmin($in['admin_email'], $in['admin_name'] ?? '', $in['admin_password']);
         $log[] = 'Utworzono konto administratora (id ' . $id . ').';
         $log[] = 'Zapisano ' . self::writeConfig($cfg);
+        @file_put_contents(Config::storage('installed.lock'), date('c'));
         return $log;
     }
 }

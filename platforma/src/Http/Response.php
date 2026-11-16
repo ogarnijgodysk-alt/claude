@@ -30,7 +30,14 @@ final class Response
         }
         header('Content-Type: text/html; charset=utf-8');
         header('Cache-Control: no-store');
+        header('Content-Length: ' . strlen($html));
+        header('Connection: close');
         echo $html;
+        if (function_exists('fastcgi_finish_request')) {
+            fastcgi_finish_request();
+        } else {
+            flush();
+        }
         exit;
     }
 

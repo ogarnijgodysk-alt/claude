@@ -103,6 +103,8 @@ final class Uploads
                 return $mime === 'image/jpeg' && @getimagesize($path) ? 'image/jpeg' : null;
             case 'png':
                 return $mime === 'image/png' && @getimagesize($path) ? 'image/png' : null;
+            case 'webp':
+                return $mime === 'image/webp' ? 'image/webp' : null;
             case 'gif':
                 return $mime === 'image/gif' ? 'image/gif' : null;
             case 'pdf':
@@ -161,6 +163,31 @@ final class Uploads
         ];
         $row['id'] = Db::insert('media', $row);
         return $row;
+    }
+
+    /**
+     * Gdzie plik jest użyty: id kursów i bloków. Dopasowanie z granicą liczby (5 != 57).
+     * @return array{courses:int[],blocks:int[]}
+     */
+    public static function usage(int $mediaId): array
+    {
+        $rows = Db::all(
+            "SELECT b.id, b.type, b.content, b.data, m.course_id FROM blocks b JOIN lessons l ON l.id = b.lesson_id JOIN modules m ON m.id = l.module_id
+             WHERE (b.type IN ('file','image') AND b.data LIKE ?) OR (b.type = 'text' AND (b.content LIKE ? OR b.content LIKE ?))",
+            ['%"media_id":' . $mediaId . '%', '%/plik/' . $mediaId . '"%', '%/obraz/' . $mediaId . '"%']
+        );
+        $courses = [];
+        $blocks = [];
+        foreach ($rows as $r) {
+            $hit = $r['type'] === 'text'
+                ? preg_match('#/(plik|obraz)/' . $mediaId . '"#', (string)$r['content']) === 1
+                : preg_match('/"media_id":' . $mediaId . '(?!\d)/', (string)$r['data']) === 1;
+            if ($hit) {
+                $courses[(int)$r['course_id']] = (int)$r['course_id'];
+                $blocks[(int)$r['id']] = (int)$r['id'];
+            }
+        }
+        return ['courses' => array_values($courses), 'blocks' => array_values($blocks)];
     }
 
     public static function path(array $media): string

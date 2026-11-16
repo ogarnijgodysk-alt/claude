@@ -5,7 +5,7 @@
 <?php foreach ($rows as $a): $given = $a['ans']['given'] ?? []; ?>
   <article class="panel pane">
     <div class="row"><b><?= e($a['full_name'] ?: $a['email']) ?></b><span class="muted small"><?= e($a['email']) ?></span><span class="sp"></span><span class="mono muted"><?= e(fmt_date($a['created_at'])) ?></span></div>
-    <div class="row"><span><?= e($a['qtitle']) ?></span><span class="chip"><?= (int)$a['score_percent'] ?>%</span><?= $a['passed'] ? '<span class="ok">zaliczony</span>' : '<span class="muted">niezaliczony</span>' ?><?= $a['needs_review'] ? ($a['reviewed_at'] ? ' <span class="muted small">oceniony ręcznie</span>' : ' <b class="warnc">do oceny ręcznej</b>') : '' ?></div>
+    <div class="row"><span><?= e($a['qtitle']) ?></span><span class="chip"><?= $a['score_percent'] === null ? '—' : (int)$a['score_percent'] . '%' ?></span><?= $a['passed'] ? '<span class="ok">zaliczony</span>' : '<span class="muted">niezaliczony</span>' ?><?= $a['needs_review'] ? ($a['reviewed_at'] ? ' <span class="muted small">oceniony ręcznie</span>' : ' <b class="warnc">do oceny ręcznej</b>') : '' ?></div>
     <?php if ($a['needs_review'] && $a['quiz']): foreach ($a['quiz']['questions'] as $q): if (App\Quiz::isAuto($q)) { continue; } $g = $given[$q['id']] ?? []; ?>
       <div class="qq"><b class="small"><?= e($q['text']) ?></b>
       <?php if ($q['type'] === 'text'): ?><div style="white-space:pre-wrap"><?= e($g['text'] ?? '') ?: '<span class="muted">brak odpowiedzi</span>' ?></div>

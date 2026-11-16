@@ -95,6 +95,7 @@ final class Spreadsheet
         $x->XML($sheet, null, LIBXML_NONET);
         $row = null;
         $col = 0;
+        $next = 0;
         $type = '';
         $val = '';
         $inCell = false;
@@ -102,10 +103,12 @@ final class Spreadsheet
             if ($x->nodeType === \XMLReader::ELEMENT) {
                 if ($x->name === 'row') {
                     $row = [];
+                    $next = 0;
                 } elseif ($x->name === 'c' && $row !== null) {
                     $ref = $x->getAttribute('r') ?? '';
                     $type = (string)$x->getAttribute('t');
-                    $col = self::colIndex($ref);
+                    $col = $ref !== '' ? self::colIndex($ref) : $next;
+                    $next = $col + 1;
                     $val = '';
                     $inCell = true;
                     if ($x->isEmptyElement) {

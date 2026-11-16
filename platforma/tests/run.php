@@ -133,5 +133,19 @@ file_put_contents($png, '<?php echo 1;');
 ok(Uploads::verify($png, 'png', Uploads::detect($png)) === null && Uploads::verify($png, 'pdf', Uploads::detect($png)) === null && Uploads::verify($png, 'docx', Uploads::detect($png)) === null, 'php disguised rejected');
 unlink($png);
 
+// --- regresje z przeglądu kodu
+$tmp = sys_get_temp_dir() . '/t' . bin2hex(random_bytes(4)) . '.xlsx';
+$z = new ZipArchive();
+$z->open($tmp, ZipArchive::CREATE);
+$z->addFromString('[Content_Types].xml', '<Types/>');
+$z->addFromString('xl/worksheets/sheet1.xml', '<worksheet><sheetData><row><c t="inlineStr"><is><t>a@b.pl</t></is></c><c t="inlineStr"><is><t>Jan</t></is></c></row></sheetData></worksheet>');
+$z->close();
+same(Spreadsheet::xlsx($tmp), [['a@b.pl', 'Jan']], 'xlsx bez atrybutu r w komórkach');
+unlink($tmp);
+$m = Smtp::build('a@b.pl', 'T', 'x', null, 'k@x.pl', 'Ogarnij Go, akademia');
+ok(str_contains($m, 'From: "Ogarnij Go, akademia" <k@x.pl>'), 'nazwa nadawcy z przecinkiem jest cytowana');
+same(Access::status(date('Y-m-d', strtotime('+3 days')))['days'], 3, 'dni do końca bez błędu strefy');
+same(Uploads::verify('/dev/null', 'webp', 'image/webp'), 'image/webp', 'webp');
+
 echo "\nTesty: $pass OK, $fail błędów\n";
 exit($fail ? 1 : 0);

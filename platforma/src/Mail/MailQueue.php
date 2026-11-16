@@ -35,17 +35,25 @@ final class MailQueue
      * (tylko wiadomości z tego żądania: priorytet dla najnowszej zakolejkowanej).
      * @return array{sent:int,failed:int}
      */
-    public static function flush(int $limit, bool $interactive = false): array
+    public static function flush(int $limit, bool $interactive = false, array $only = []): array
     {
         [$from, $fromName] = self::from();
         // kolejka jednego rodzaju na raz nie blokuje resetów: najpierw wiadomości transakcyjne
-        $rows = Db::all("SELECT * FROM mail_queue WHERE status = 'pending' AND send_after <= ? ORDER BY (kind = 'reset') DESC, " . ($interactive ? 'id DESC' : 'id ASC') . ' LIMIT ' . (int)$limit, [now()]);
+        $onlySql = $only ? ' AND id IN (' . implode(',', array_map('intval', $only)) . ')' : '';
+        $rows = Db::all("SELECT * FROM mail_queue WHERE status = 'pending' AND send_after <= ?" . $onlySql . " ORDER BY (kind = 'reset') DESC, " . ($interactive ? 'id DESC' : 'id ASC') . ' LIMIT ' . (int)$limit, [now()]);
         $sent = 0;
         $failed = 0;
         foreach ($rows as $m) {
             // „zajmij” wiadomość, żeby równoległe procesy jej nie wysłały drugi raz
             if (Db::exec("UPDATE mail_queue SET attempts = attempts + 1, send_after = ? WHERE id = ? AND status = 'pending' AND attempts = ?", [date('Y-m-d H:i:s', time() + 300), $m['id'], $m['attempts']]) !== 1) {
                 continue;
+            }
+            if ($m['user_id'] && in_array($m['kind'], ['reset', 'invite'], true)) {
+                $cur = Db::val('SELECT email FROM users WHERE id = ?', [$m['user_id']]);
+                if ($cur === null || mb_strtolower((string)$cur) !== mb_strtolower($m['to_email'])) {
+                    Db::update('mail_queue', ['status' => 'failed', 'last_error' => 'Adres konta zmienił się po zakolejkowaniu'], 'id = ?', [$m['id']]);
+                    continue;
+                }
             }
             try {
                 $text = $m['body_text'];

@@ -156,7 +156,7 @@ final class ClientImport
      */
     public static function process(int $jobId, float $budget = 8.0): array
     {
-        $lock = 'kursy_job_' . $jobId;
+        $lock = 'kursy_' . substr(md5((string)\App\Config::get('db.name', '') . __DIR__), 0, 12) . '_job_' . $jobId;
         if ((int)Db::val('SELECT GET_LOCK(?, 0)', [$lock]) !== 1) {
             return self::state($jobId); // ktoś inny już przetwarza
         }

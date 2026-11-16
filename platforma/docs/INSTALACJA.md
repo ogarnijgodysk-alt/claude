@@ -29,7 +29,7 @@ Utwórz pustą bazę i użytkownika w panelu hostingu (lub poleceniami `CREATE D
 ## 4. Instalacja (jedna z dwóch dróg)
 
 ### A. Przez przeglądarkę
-Wejdź na `https://poddomena/instalator.php`. Formularz sprawdzi wymagania, połączy się z bazą, utworzy tabele, konto administratora i plik `config/config.php`. Pierwsze konto administratora to **Marek** (adres `latuszekmarek@gmail.com` po imporcie dostaje rolę administratora; hasło ustawiasz w instalatorze). **Po instalacji usuń `public/instalator.php`.**
+Wejdź na `https://poddomena/instalator.php`. Formularz sprawdzi wymagania, połączy się z bazą, utworzy tabele, konto administratora i plik `config/config.php`. Pierwsze konto administratora to **Marek** (adres `latuszekmarek@gmail.com` po imporcie dostaje rolę administratora; hasło ustawiasz w instalatorze). **Po instalacji usuń `public/instalator.php`.** Uwaga: między wgraniem plików a instalacją instalator jest dostępny dla każdego, kto zna adres, więc zainstaluj od razu po wgraniu (albo użyj instalacji z SSH). Po udanej instalacji instalator sam się blokuje (`storage/installed.lock`).
 
 ### B. Z linii poleceń (SSH)
 ```bash
@@ -64,7 +64,7 @@ Paczka: `kursy.json`, `quizy.json`, `kursanci.csv`, `dostepy.csv`. Wgraj ją do 
 ```bash
 php bin/import-publigo.php --dir=storage/imports/paczka
 ```
-Import trwa kilka sekund i jest bezpieczny do powtórzenia (kursy już w bazie są pomijane, konta i przypisania uzupełniane; `--replace-content` nadpisuje treść kursów). Na końcu powstaje **raport zgodności** w `storage/reports/`: plik HTML do przeczytania przez Marka, JSON oraz CSV z listą plików do pobrania. W panelu: **Migracja → Otwórz najnowszy raport**. Samo odświeżenie raportu bez importu: `--report-only`.
+Import trwa kilka sekund i jest bezpieczny do powtórzenia (kursy już w bazie są pomijane, konta i przypisania uzupełniane; `--replace-content --yes` odtwarza treść kursów już w bazie i kasuje przy tym postęp kursantów w lekcjach oraz przepięte linki do plików; zwykły ponowny import niczego nie nadpisuje, daty dostępu zostają). Na końcu powstaje **raport zgodności** w `storage/reports/`: plik HTML do przeczytania przez Marka, JSON oraz CSV z listą plików do pobrania. W panelu: **Migracja → Otwórz najnowszy raport**. Samo odświeżenie raportu bez importu: `--report-only`.
 
 Co zawiera raport: liczby w źródle i w bazie (kursy, moduły, lekcje, bloki wideo Vimeo/YouTube, obrazy, pliki, quizy i ich pytania, konta, przypisania, daty dostępu) z różnicami; listę elementów pominiętych lub zmienionych (14 pustych lekcji, 9× `[trenerka]`, 6 osadzeń Spotify, osadzenia innych serwisów zamienione na linki, puste bloki); 9 kont o roli innej niż „Subskrybent”; kursy bez kursantów; **losową próbę 20 lekcji** do ręcznego porównania z Publigo; inwentaryzację plików (domeny i rozszerzenia).
 

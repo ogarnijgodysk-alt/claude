@@ -9,7 +9,7 @@ header('Content-Type: text/html; charset=utf-8');
 header('X-Frame-Options: DENY');
 header('Cache-Control: no-store');
 
-$done = is_file(APP_ROOT . '/config/config.php');
+$done = is_file(APP_ROOT . '/config/config.php') || getenv('KURSY_CONFIG') || is_file(App\Config::storage('installed.lock'));
 $h = fn($s) => htmlspecialchars((string)$s, ENT_QUOTES, 'UTF-8');
 $out = '';
 $errors = [];

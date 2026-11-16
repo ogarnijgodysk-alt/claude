@@ -55,7 +55,7 @@ final class AdminClients extends Base
                 continue;
             }
             $d = trim((string)($exp[$cid] ?? ''));
-            $out[$cid] = (preg_match('/^\d{4}-\d{2}-\d{2}$/', $d) && strtotime($d)) ? $d : null;
+            $out[$cid] = (preg_match('/^(\d{4})-(\d{2})-(\d{2})$/', $d, $dm) && checkdate((int)$dm[2], (int)$dm[3], (int)$dm[1])) ? $d : null;
         }
         return $out;
     }
@@ -135,6 +135,10 @@ final class AdminClients extends Base
         if ((int)$u['id'] === (int)$me['id']) {
             $role = 'admin'; // nie odbieramy sobie roli
         }
+        if (mb_strtolower((string)$u['email']) !== $email) {
+            Db::exec("UPDATE mail_queue SET status = 'failed', last_error = 'Zmiana adresu e-mail konta' WHERE user_id = ? AND status = 'pending'", [$u['id']]);
+            Db::exec('UPDATE password_resets SET used_at = ? WHERE user_id = ? AND used_at IS NULL', [now(), $u['id']]);
+        }
         Db::update('users', ['email' => $email, 'first_name' => $first, 'last_name' => $last, 'full_name' => trim($first . ' ' . $last), 'role' => $role], 'id = ?', [$u['id']]);
         $this->syncEnrollments((int)$u['id'], $this->readAssign($r));
         $this->flashRedirect('/admin/klienci/' . $u['id'], 'Zapisano dane klienta, kursy i daty dostępu.');
@@ -147,8 +151,8 @@ final class AdminClients extends Base
         if (!$u) {
             Response::error(404);
         }
-        Auth::sendInvite((int)$u['id'], 'invite', false);
-        \App\Mail\MailQueue::flush(1);
+        $mid = Auth::sendInvite((int)$u['id'], 'invite', false);
+        \App\Mail\MailQueue::flush(1, false, [$mid]);
         $this->flashRedirect('/admin/klienci/' . $u['id'], 'Wysłano (lub zakolejkowano) e-mail z linkiem do ustawienia hasła.');
     }
 
@@ -167,17 +171,24 @@ final class AdminClients extends Base
             $this->flashRedirect($back, 'Nie zaznaczono żadnych klientów.', 'warn');
         }
         $n = 0;
+        $ext = 0;
         $exp = Access::defaultExpiry($course);
         foreach (array_chunk($ids, 500) as $chunk) {
             $in = implode(',', $chunk);
             if ($op === 'add') {
-                $n += Db::exec("INSERT IGNORE INTO enrollments (user_id, course_id, expires_at, created_at) SELECT u.id, ?, ?, ? FROM users u WHERE u.id IN ($in)", [$cid, $exp, now()]);
+                $had = (int)Db::val("SELECT COUNT(*) FROM enrollments WHERE course_id = ? AND user_id IN ($in)", [$cid]);
+                $new = count($chunk) - $had;
+                // nowe przypisania + przedłużenie istniejących (data nigdy nie jest skracana; bezterminowy zostaje bezterminowy)
+                $aff = Db::exec("INSERT INTO enrollments (user_id, course_id, expires_at, created_at) SELECT u.id, ?, ?, ? FROM users u WHERE u.id IN ($in)
+                    ON DUPLICATE KEY UPDATE expires_at = CASE WHEN enrollments.expires_at IS NULL THEN NULL WHEN VALUES(expires_at) IS NULL THEN NULL WHEN VALUES(expires_at) > enrollments.expires_at THEN VALUES(expires_at) ELSE enrollments.expires_at END", [$cid, $exp, now()]);
+                $n += $new;
+                $ext += max(0, (int)(($aff - $new) / 2));
             } else {
                 $n += Db::exec("DELETE FROM enrollments WHERE course_id = ? AND user_id IN ($in)", [$cid]);
             }
         }
         $msg = 'Kurs „' . $course['title'] . '” ' . ($op === 'add' ? 'przypisano' : 'odebrano') . ': ' . nf($n) . ' ' . ($n === 1 ? 'klient' : 'klientów')
-            . ($op === 'add' ? ' · ' . ($exp ? 'dostęp do ' . fmt_date($exp) : 'dostęp bezterminowy') : '');
+            . ($op === 'add' ? ($ext ? ', przedłużono dostęp: ' . nf($ext) : '') . ' · ' . ($exp ? 'dostęp do ' . fmt_date($exp) : 'dostęp bezterminowy') : '');
         $this->flashRedirect($back, $msg);
     }
 }

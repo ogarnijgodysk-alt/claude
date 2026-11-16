@@ -24,7 +24,7 @@ final class AuthController extends Base
 
     public function login(Request $r): void
     {
-        $res = Auth::attempt($r, $r->str('email'), (string)($r->post['password'] ?? ''));
+        $res = Auth::attempt($r, $r->str('email'), is_string($r->post['password'] ?? null) ? $r->post['password'] : '');
         if (!$res['ok']) {
             http_response_code(401);
             $this->loginView(['error' => $res['error'], 'email' => $r->str('email')]);
@@ -49,7 +49,10 @@ final class AuthController extends Base
         if (!valid_email($email)) {
             $this->page('auth/forgot', ['email' => $email, 'error' => 'Wpisz poprawny adres e-mail.', 'sent' => false, 'ttl' => (int)Settings::get('reset_ttl', '60')], 'auth');
         }
+        $t0 = microtime(true);
         Auth::requestReset($r, $email);
+        // stały minimalny czas odpowiedzi: nie zdradza, czy konto istnieje
+        usleep((int)max(0, 350000 - (microtime(true) - $t0) * 1e6));
         // zawsze ta sama odpowiedź, niezależnie od tego, czy adres jest w bazie
         $this->page('auth/forgot', ['email' => $email, 'error' => null, 'sent' => true, 'ttl' => (int)Settings::get('reset_ttl', '60')], 'auth');
     }
@@ -71,12 +74,12 @@ final class AuthController extends Base
             http_response_code(410);
             $this->page('auth/reset_invalid', [], 'auth');
         }
-        $err = Auth::passwordError((string)($r->post['password'] ?? ''), (string)($r->post['password2'] ?? ''));
+        $err = Auth::passwordError(is_string($r->post['password'] ?? null) ? $r->post['password'] : '', is_string($r->post['password2'] ?? null) ? $r->post['password2'] : '');
         if ($err) {
             http_response_code(422);
             $this->page('auth/reset', ['email' => $row['email'], 'error' => $err], 'auth');
         }
-        Auth::setPassword((int)$row['user_id'], (string)$r->post['password']);
+        Auth::setPassword((int)$row['user_id'], $r->post['password']);
         Security::log('password_set', (int)$row['user_id'], $row['email'], $r->ip());
         Session::destroy();
         Session::start();

@@ -14,7 +14,7 @@ use App\Config;
 use App\Migration\PubligoImporter;
 use App\Migration\Report;
 
-$o = getopt('', ['dir:', 'admin-email::', 'replace-content', 'report-only', 'help']);
+$o = getopt('', ['dir:', 'admin-email::', 'replace-content', 'report-only', 'help', 'yes']);
 if (isset($o['help']) || empty($o['dir'])) {
     echo "Użycie: php bin/import-publigo.php --dir=KATALOG_PACZKI [--admin-email=EMAIL] [--replace-content] [--report-only]\n"
         . "  --dir              katalog z kursy.json, quizy.json, kursanci.csv, dostepy.csv\n"
@@ -22,6 +22,9 @@ if (isset($o['help']) || empty($o['dir'])) {
         . "  --replace-content  nadpisz treść kursów, które już są w bazie (domyślnie są pomijane)\n"
         . "  --report-only      nie importuj, tylko wygeneruj raport zgodności źródło vs baza\n";
     exit(isset($o['help']) ? 0 : 1);
+}
+if (isset($o['replace-content']) && !isset($o['yes'])) {
+    exit("--replace-content USUWA i odtwarza treść kursów już w bazie (przepada postęp kursantów w lekcjach, podpięte quizy i przepięte linki do plików).\nJeśli na pewno tego chcesz, dodaj --yes. Zwykły ponowny import (bez tej opcji) niczego nie nadpisuje.\n");
 }
 $dir = rtrim((string)$o['dir'], '/');
 $log = static function (string $m): void {

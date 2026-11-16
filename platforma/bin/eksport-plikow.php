@@ -25,8 +25,8 @@ $n = 0;
 $bytes = 0;
 foreach (Db::all('SELECT * FROM media WHERE source_url IS NOT NULL ORDER BY id') as $m) {
     $u = parse_url((string)$m['source_url']);
-    $rel = ($u['host'] ?? 'inne') . '/' . implode('/', array_map('rawurldecode', explode('/', trim((string)($u['path'] ?? $m['original_name']), '/'))));
-    $rel = preg_replace('#\.\./#', '', $rel);
+    $segs = array_values(array_filter(array_map('rawurldecode', explode('/', (string)($u['path'] ?? $m['original_name']))), fn($x) => $x !== '' && $x !== '.' && $x !== '..' && !str_contains($x, '/') && !str_contains($x, '\\') && !str_contains($x, "\0")));
+    $rel = preg_replace('/[^\w.\-]/', '_', (string)($u['host'] ?? 'inne')) . '/' . implode('/', $segs ?: [$m['stored_name']]);
     $dest = $dir . '/' . $rel;
     @mkdir(dirname($dest), 0750, true);
     if (!copy(Uploads::path($m), $dest)) {

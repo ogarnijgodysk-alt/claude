@@ -4,7 +4,7 @@ declare(strict_types=1);
 namespace App\Controllers;
 
 use App\Http\{Request, Response};
-use App\{Access, Auth, BlockRenderer, Db, Quiz, Session, Settings, Uploads};
+use App\{Access, Auth, BlockRenderer, Db, Quiz, Security, Session, Settings, Uploads};
 
 final class StudentController extends Base
 {
@@ -144,13 +144,14 @@ final class StudentController extends Base
         }
         $given = [];
         $needsReview = false;
+        $fileQs = [];
         foreach ($quiz['questions'] as $q) {
             $qid = (int)$q['id'];
             if (Quiz::isAuto($q)) {
                 $sel = $r->post['q'][$qid] ?? [];
                 $sel = is_array($sel) ? $sel : [$sel];
-                $valid = array_column($q['answers'], 'id');
-                $given[$qid] = array_values(array_filter(array_map('intval', $sel), fn($x) => in_array($x, array_map('intval', $valid), true)));
+                $valid = array_map('intval', array_column($q['answers'], 'id'));
+                $given[$qid] = array_values(array_filter(array_map('intval', array_filter($sel, 'is_scalar')), fn($x) => in_array($x, $valid, true)));
                 if ($q['type'] === 'single') {
                     $given[$qid] = array_slice($given[$qid], 0, 1);
                 }
@@ -158,26 +159,45 @@ final class StudentController extends Base
                     $this->flashRedirect($back, 'Odpowiedz na wszystkie pytania zamknięte.', 'warn');
                 }
             } elseif ($q['type'] === 'text') {
-                $given[$qid] = ['text' => mb_substr((string)($r->post['q'][$qid] ?? ''), 0, 5000)];
+                $t = $r->post['q'][$qid] ?? '';
+                $given[$qid] = ['text' => mb_substr(is_string($t) ? $t : '', 0, 5000)];
                 $needsReview = true;
             } else {
                 $needsReview = true;
-                $f = $_FILES['qf']['name'][$qid] ?? null;
-                if ($f !== null && $f !== '') {
-                    $one = ['name' => $_FILES['qf']['name'][$qid], 'tmp_name' => $_FILES['qf']['tmp_name'][$qid], 'error' => $_FILES['qf']['error'][$qid], 'size' => $_FILES['qf']['size'][$qid]];
-                    $res = Uploads::store($one, 'quiz');
-                    if (!$res['ok']) {
-                        $this->flashRedirect($back, $res['error'], 'warn');
-                    }
-                    $given[$qid] = ['media_id' => (int)$res['media']['id'], 'name' => $res['media']['original_name']];
-                } else {
-                    $given[$qid] = ['media_id' => null, 'name' => ''];
-                }
+                $fileQs[] = $qid;
             }
         }
+        // pliki zapisujemy dopiero po sprawdzeniu reszty, z limitem na użytkownika
+        $stored = [];
+        foreach ($fileQs as $qid) {
+            $f = $_FILES['qf']['name'][$qid] ?? null;
+            $given[$qid] = ['media_id' => null, 'name' => ''];
+            if ($f === null || $f === '' || (int)($_FILES['qf']['error'][$qid] ?? 4) === UPLOAD_ERR_NO_FILE) {
+                continue;
+            }
+            if (Security::tooMany('quiz_upload', (string)$u['id'], 10, 86400)) {
+                foreach ($stored as $mid) {
+                    Uploads::remove($mid);
+                }
+                $this->flashRedirect($back, 'Przekroczono dzienny limit wysyłanych plików. Spróbuj jutro.', 'warn');
+            }
+            $one = ['name' => $_FILES['qf']['name'][$qid], 'tmp_name' => $_FILES['qf']['tmp_name'][$qid], 'error' => $_FILES['qf']['error'][$qid], 'size' => $_FILES['qf']['size'][$qid]];
+            $res = Uploads::store($one, 'quiz');
+            if (!$res['ok']) {
+                foreach ($stored as $mid) {
+                    Uploads::remove($mid);
+                }
+                $this->flashRedirect($back, $res['error'], 'warn');
+            }
+            Security::hit('quiz_upload', (string)$u['id']);
+            $stored[] = (int)$res['media']['id'];
+            $given[$qid] = ['media_id' => (int)$res['media']['id'], 'name' => $res['media']['original_name']];
+        }
         $g = Quiz::grade($quiz, $given);
+        // quiz bez pytań zamkniętych nie zalicza się sam: czeka na ocenę ręczną
+        $manualOnly = $g['total'] === 0 && $needsReview;
         Db::insert('quiz_attempts', [
-            'quiz_id' => $quizId, 'user_id' => $u['id'], 'score_percent' => $g['pct'], 'passed' => $g['pass'] ? 1 : 0,
+            'quiz_id' => $quizId, 'user_id' => $u['id'], 'score_percent' => $manualOnly ? null : $g['pct'], 'passed' => ($g['pass'] && !$manualOnly) ? 1 : 0,
             'needs_review' => $needsReview ? 1 : 0, 'answers' => json_encode(['given' => $given, 'det' => $g['det']], JSON_UNESCAPED_UNICODE),
             'created_at' => now(),
         ]);

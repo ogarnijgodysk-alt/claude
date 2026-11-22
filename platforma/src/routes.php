@@ -53,6 +53,7 @@ return function (App\Router $r): void {
 
     $r->get('/admin/ustawienia', [AdminMisc::class, 'settings']);
     $r->post('/admin/ustawienia', [AdminMisc::class, 'saveSettings']);
+    $r->post('/admin/haslo', [AdminMisc::class, 'changePassword']);
     $r->get('/admin/migracja', [AdminMisc::class, 'migration']);
     $r->get('/admin/migracja/raport', [AdminMisc::class, 'report']);
 };

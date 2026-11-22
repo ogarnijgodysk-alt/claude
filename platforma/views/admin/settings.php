@@ -24,3 +24,9 @@
 </div>
 <div class="row end" style="margin-top:16px"><button class="btn primary" type="submit">Zapisz ustawienia</button></div>
 </form>
+<form class="panel pane" id="haslo" method="post" action="<?= e(url('/admin/haslo')) ?>" style="margin-top:24px"><?= App\Csrf::field() ?>
+  <div><h3>Moje hasło (administrator)</h3><p class="small muted" style="margin:4px 0 0">Konto: <?= e($user['email']) ?>. Minimum 10 znaków. Po zmianie zostaniesz zalogowany, a inne sesje tego konta wygasną.</p></div>
+  <div><label class="l" for="pc">Obecne hasło</label><input id="pc" name="current" class="in" type="password" autocomplete="current-password" required></div>
+  <div class="row2"><div><label class="l" for="pn">Nowe hasło</label><input id="pn" name="password" class="in" type="password" autocomplete="new-password" minlength="10" required></div><div><label class="l" for="pn2">Powtórz nowe hasło</label><input id="pn2" name="password2" class="in" type="password" autocomplete="new-password" required></div></div>
+  <div class="row end"><button class="btn primary" type="submit">Zmień hasło</button></div>
+</form>

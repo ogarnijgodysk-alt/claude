@@ -83,6 +83,30 @@ final class AdminMisc extends Base
         $this->flashRedirect('/admin/ustawienia', 'Zapisano ustawienia.');
     }
 
+    /** Zmiana własnego hasła przez zalogowanego administratora. */
+    public function changePassword(Request $r): void
+    {
+        $me = $this->admin();
+        $cur = is_string($r->post['current'] ?? null) ? $r->post['current'] : '';
+        $p1 = is_string($r->post['password'] ?? null) ? $r->post['password'] : '';
+        $p2 = is_string($r->post['password2'] ?? null) ? $r->post['password2'] : '';
+        if (\App\Security::tooMany('login_email', $me['email'], 8, 900)) {
+            $this->flashRedirect('/admin/ustawienia#haslo', 'Zbyt wiele prób. Spróbuj za kilkanaście minut.', 'warn');
+        }
+        if (!empty($me['password_hash']) && !password_verify($cur, $me['password_hash'])) {
+            \App\Security::hit('login_email', $me['email']);
+            $this->flashRedirect('/admin/ustawienia#haslo', 'Obecne hasło jest nieprawidłowe.', 'warn');
+        }
+        if ($err = \App\Auth::passwordError($p1, $p2)) {
+            $this->flashRedirect('/admin/ustawienia#haslo', $err, 'warn');
+        }
+        \App\Auth::setPassword((int)$me['id'], $p1);
+        \App\Security::log('password_changed', (int)$me['id'], $me['email'], $r->ip());
+        // setPassword unieważnia wszystkie sesje; zaloguj ponownie bieżącą
+        \App\Session::login(Db::one('SELECT * FROM users WHERE id = ?', [$me['id']]));
+        $this->flashRedirect('/admin/ustawienia#haslo', 'Hasło zostało zmienione.');
+    }
+
     public function migration(Request $r): void
     {
         $this->admin();

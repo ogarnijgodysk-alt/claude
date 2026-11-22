@@ -92,6 +92,49 @@ final class Auth
         Security::log('reset_requested', (int)$u['id'], $email, $ip);
     }
 
+    /**
+     * Logowanie linkiem z e-maila (bez hasła). Ta sama zasada co przy resecie hasła: odpowiedź zawsze jednakowa,
+     * limity per adres i per IP. Konta administratorów nie mają tej metody (wchodzą hasłem).
+     */
+    public static function requestLoginLink(Request $r, string $email): void
+    {
+        $email = mb_strtolower(trim($email));
+        $ip = $r->ip();
+        if (!valid_email($email) || Settings::get('login_mode') !== 'magic') {
+            return;
+        }
+        if (Security::tooMany('reset_ip', $ip, 10, 3600)) {
+            Security::log('login_link_throttled_ip', null, $email, $ip);
+            return;
+        }
+        Security::hit('reset_ip', $ip);
+        if (Security::tooMany('reset_email', $email, 5, 3600) || Security::count('reset_email', $email, 60) >= 1) {
+            Security::log('login_link_throttled_email', null, $email, $ip);
+            return;
+        }
+        Security::hit('reset_email', $email);
+        $u = Db::one('SELECT id, email, first_name, role FROM users WHERE email = ?', [$email]);
+        if (!$u || $u['role'] === 'admin') {
+            Security::log($u ? 'login_link_admin_blocked' : 'login_link_unknown_email', $u ? (int)$u['id'] : null, $email, $ip);
+            return;
+        }
+        $ttl = max(10, (int)Settings::get('reset_ttl', '60'));
+        $link = abs_url('/logowanie/link/' . self::issueToken((int)$u['id']));
+        [$subject, $text, $html] = Mail\Templates::loginLink($u, $link, $ttl);
+        $mid = MailQueue::enqueue((int)$u['id'], $u['email'], 'login', $subject, $text, $html);
+        register_shutdown_function(static function () use ($mid): void {
+            ignore_user_abort(true);
+            if (function_exists('fastcgi_finish_request')) {
+                fastcgi_finish_request();
+            }
+            try {
+                MailQueue::flush(1, true, [$mid]);
+            } catch (\Throwable) {
+            }
+        });
+        Security::log('login_link_requested', (int)$u['id'], $email, $ip);
+    }
+
     /** Tworzy jednorazowy token (w bazie tylko skrót SHA-256) i zwraca wartość do linku. */
     public static function issueToken(int $userId): string
     {

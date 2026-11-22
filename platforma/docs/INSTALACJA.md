@@ -111,6 +111,15 @@ Na hostingu współdzielonym włącz kopie dostawcy i sprawdź ich retencję.
 * Dane osobowe: potrzebna **umowa powierzenia przetwarzania danych** między Markiem a Tobą (jeśli to Ty prowadzisz serwer) oraz z dostawcą e-mail.
 * Po zakończeniu migracji usuń paczkę (`storage/imports/paczka`) i tymczasowe kopie z danymi klientów.
 
+## 12a. Sposób logowania klientów
+
+W **Ustawienia → Sposób logowania klientów** są trzy tryby:
+* **Tylko adres e-mail** (domyślny; nic nie jest wysyłane): klient wpisuje adres i wchodzi. Każdy, kto zna cudzy adres, wejdzie na jego konto (zobaczy kursy i postęp, nie zobaczy haseł ani danych płatniczych, których platforma nie przechowuje). Chroni przed zgadywaniem limit prób na IP (25 na 15 min). Wygodne na okres przejściowy.
+* **Link z e-maila:** klient wpisuje adres i dostaje link logujący (jednorazowy, ważny 30/60/120 min). Wymaga działającego SMTP z SPF/DKIM/DMARC.
+* **E-mail i hasło:** klasycznie; hasło z linku lub z importu starych haszy.
+
+Konta **administratorów** zawsze logują się hasłem we wszystkich trybach. Zmianę trybu zrobisz w sekundę, bez ponownej instalacji. Na stałe zalecamy tryb „Link z e-maila”.
+
 ## 13. Przełączenie (skrót)
 
 1. Instalacja i testy na poddomenie tymczasowej, Publigo działa bez zmian.

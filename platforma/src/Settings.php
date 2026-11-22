@@ -8,8 +8,9 @@ final class Settings
     private static ?array $cache = null;
 
     public const DEFAULTS = [
+        'login_mode' => 'email', // email | magic | password
         'login_notice_on' => '1',
-        'login_notice' => 'Platforma kursów została przeniesiona. Jeśli logujesz się tutaj po raz pierwszy, zaktualizuj hasło: kliknij „Pierwsze logowanie / nie pamiętam hasła”, wpisz swój e-mail i ustaw nowe hasło z linku, który do Ciebie wyślemy. Twoje kursy czekają na Ciebie na koncie.',
+        'login_notice' => 'Platforma kursów została przeniesiona. Żeby wejść do swoich kursów, wpisz adres e-mail, na który je kupiłeś. Hasło nie jest potrzebne.',
         'reset_ttl' => '60',
         'mail_from' => '',
         'mail_from_name' => 'Twoja Akademia',

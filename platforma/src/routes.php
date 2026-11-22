@@ -7,6 +7,10 @@ return function (App\Router $r): void {
     $r->get('/', [Home::class, 'index']);
     $r->get('/logowanie', [AuthController::class, 'loginForm']);
     $r->post('/logowanie', [AuthController::class, 'login']);
+    $r->post('/logowanie/email', [AuthController::class, 'emailLogin']);
+    $r->post('/logowanie/link', [AuthController::class, 'linkRequest']);
+    $r->get('/logowanie/link/{token}', [AuthController::class, 'linkConfirmForm']);
+    $r->post('/logowanie/link/{token}', [AuthController::class, 'linkConfirm']);
     $r->post('/wyloguj', [AuthController::class, 'logout']);
     $r->get('/haslo', [AuthController::class, 'forgotForm']);
     $r->post('/haslo', [AuthController::class, 'forgot']);

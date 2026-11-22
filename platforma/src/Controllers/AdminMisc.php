@@ -63,6 +63,7 @@ final class AdminMisc extends Base
         $this->admin();
         $notice = trim((string)($r->post['login_notice'] ?? ''));
         Settings::set('login_notice', mb_substr(Sanitizer::text($notice, 2000), 0, 2000));
+        Settings::set('login_mode', in_array($r->str('login_mode'), ['email', 'magic', 'password'], true) ? $r->str('login_mode') : 'email');
         Settings::set('login_notice_on', $r->str('login_notice_on') === '1' ? '1' : '0');
         $ttl = $r->int('reset_ttl', 60);
         Settings::set('reset_ttl', (string)(in_array($ttl, [30, 60, 120], true) ? $ttl : 60));

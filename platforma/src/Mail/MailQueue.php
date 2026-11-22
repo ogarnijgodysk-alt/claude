@@ -40,7 +40,7 @@ final class MailQueue
         [$from, $fromName] = self::from();
         // kolejka jednego rodzaju na raz nie blokuje resetów: najpierw wiadomości transakcyjne
         $onlySql = $only ? ' AND id IN (' . implode(',', array_map('intval', $only)) . ')' : '';
-        $rows = Db::all("SELECT * FROM mail_queue WHERE status = 'pending' AND send_after <= ?" . $onlySql . " ORDER BY (kind = 'reset') DESC, " . ($interactive ? 'id DESC' : 'id ASC') . ' LIMIT ' . (int)$limit, [now()]);
+        $rows = Db::all("SELECT * FROM mail_queue WHERE status = 'pending' AND send_after <= ?" . $onlySql . " ORDER BY (kind IN ('reset','login')) DESC, " . ($interactive ? 'id DESC' : 'id ASC') . ' LIMIT ' . (int)$limit, [now()]);
         $sent = 0;
         $failed = 0;
         foreach ($rows as $m) {
@@ -48,7 +48,7 @@ final class MailQueue
             if (Db::exec("UPDATE mail_queue SET attempts = attempts + 1, send_after = ? WHERE id = ? AND status = 'pending' AND attempts = ?", [date('Y-m-d H:i:s', time() + 300), $m['id'], $m['attempts']]) !== 1) {
                 continue;
             }
-            if ($m['user_id'] && in_array($m['kind'], ['reset', 'invite'], true)) {
+            if ($m['user_id'] && in_array($m['kind'], ['reset', 'invite', 'login'], true)) {
                 $cur = Db::val('SELECT email FROM users WHERE id = ?', [$m['user_id']]);
                 if ($cur === null || mb_strtolower((string)$cur) !== mb_strtolower($m['to_email'])) {
                     Db::update('mail_queue', ['status' => 'failed', 'last_error' => 'Adres konta zmienił się po zakolejkowaniu'], 'id = ?', [$m['id']]);

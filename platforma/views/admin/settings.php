@@ -2,6 +2,7 @@
 <form method="post" action="<?= e(url('/admin/ustawienia')) ?>"><?= App\Csrf::field() ?>
 <div class="panel pane">
   <div><h3>Komunikat na ekranie logowania</h3><p class="small muted" style="margin:4px 0 0">Wyświetla się nad formularzem. Po okresie przejściowym możesz go wyłączyć.</p></div>
+  <div><label class="l" for="lm">Sposób logowania klientów</label><select id="lm" name="login_mode" class="in"><option value="email"<?= $s['login_mode'] === 'email' ? ' selected' : '' ?>>Tylko adres e-mail, bez hasła i bez wysyłki (najmniej bezpieczne)</option><option value="magic"<?= $s['login_mode'] === 'magic' ? ' selected' : '' ?>>Link z e-maila, bez hasła (klient podaje tylko adres)</option><option value="password"<?= $s['login_mode'] === 'password' ? ' selected' : '' ?>>E-mail i hasło</option></select><p class="small muted" style="margin:4px 0 0">Administratorzy zawsze logują się hasłem. Link działa jeden raz i wygasa (ustawienie niżej).</p></div>
   <label class="inl"><input type="checkbox" name="login_notice_on" value="1"<?= $s['login_notice_on'] === '1' ? ' checked' : '' ?>> Pokaż komunikat</label>
   <div><label class="l" for="sn">Treść komunikatu</label><textarea id="sn" name="login_notice" class="in" rows="4"><?= e($s['login_notice']) ?></textarea></div>
   <div class="row"><a class="btn" href="<?= e(url('/logowanie')) ?>" target="_blank" rel="noopener">Zobacz ekran logowania</a></div>

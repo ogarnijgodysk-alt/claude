@@ -81,6 +81,7 @@ php bin/pobierz-pliki.php             # pełne pobieranie, wielokrotnego użytku
 * `--probe` sprawdza, czy serwer CDN wydaje pliki. Jeśli zwraca **403/401** (pliki wymagają zalogowania do Publigo) lub brak połączenia, skrypt **zatrzymuje się** (kod wyjścia 2). Wtedy pobierz pliki przeglądarką po zalogowaniu, wgraj je ręcznie jako bloki „Plik”/„Obraz” w edytorze albo skontaktuj się z programistą.
 * Pobieranie pomija to, co już pobrane, ponawia błędy przy kolejnym uruchomieniu i zapisuje raport niepowodzeń do `storage/reports/pobieranie-bledy-….csv`. Pliki są weryfikowane po zawartości (strona HTML pod adresem pliku jest odrzucana). Linki w blokach i w tekście lekcji są przepinane na własny serwer.
 * Opcje: `--hosts=cdn.idealms.net,obiblog.pl` (inne domeny, np. stare obrazy z obiblog.pl), `--allow-ext=gif,webp` (rozszerzenia spoza listy), `--sleep-ms=200` (pauza między plikami).
+* **Gdy CDN Publigo już nie działa:** użyj archiwum `pliki-publigo.zip` (kopia wszystkich plików z lekcji, z `indeks.csv`). Rozpakuj je i uruchom `php bin/wczytaj-pliki-z-eksportu.php --dir=/sciezka/pliki-publigo`. Skrypt wczytuje pliki bez sięgania do sieci i przepina linki w lekcjach (sprawdzone: 195 plików, 662 bloki).
 * Stan: **Migracja** w panelu pokazuje, ile plików jest już na własnym serwerze, a ile nadal zdalnych.
 
 ## 9. Vimeo i YouTube

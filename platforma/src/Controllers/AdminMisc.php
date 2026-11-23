@@ -125,7 +125,83 @@ final class AdminMisc extends Base
                 }
             }
         }
-        $this->page('admin/migration', ['reports' => array_map('basename', array_slice($files, 0, 10)), 'remote' => $remote, 'local' => $local, 'active' => 'migracja', 'title' => 'Migracja z Publigo'], 'admin');
+        $present = [];
+        foreach (\App\Migration\PubligoImporter::requiredFiles() as $nm) {
+            $pf = Config::storage('imports/paczka/' . $nm);
+            $present[$nm] = is_file($pf) ? filesize($pf) : null;
+        }
+        $this->page('admin/migration', ['present' => $present, 'users' => (int)Db::val('SELECT COUNT(*) FROM users'), 'enroll' => (int)Db::val('SELECT COUNT(*) FROM enrollments'), 'reports' => array_map('basename', array_slice($files, 0, 10)), 'remote' => $remote, 'local' => $local, 'active' => 'migracja', 'title' => 'Migracja z Publigo'], 'admin');
+    }
+
+    private function packageDir(): string
+    {
+        $d = Config::storage('imports/paczka');
+        @mkdir($d, 0750, true);
+        return $d;
+    }
+
+    /** Wgranie plików paczki Publigo (dokładnie te cztery nazwy). */
+    public function migrationUpload(Request $r): void
+    {
+        $this->admin();
+        $dir = $this->packageDir();
+        $n = 0;
+        foreach (\App\Migration\PubligoImporter::requiredFiles() as $name) {
+            $f = $_FILES[str_replace('.', '_', $name)] ?? null;
+            if (!$f || (int)$f['error'] === UPLOAD_ERR_NO_FILE) {
+                continue;
+            }
+            if ((int)$f['error'] !== UPLOAD_ERR_OK || !is_uploaded_file((string)$f['tmp_name'])) {
+                $this->flashRedirect('/admin/migracja', 'Nie udało się wgrać pliku ' . $name . ' (sprawdź limit wgrywania na serwerze).', 'warn');
+            }
+            $head = (string)file_get_contents((string)$f['tmp_name'], false, null, 0, 4);
+            $isJson = str_ends_with($name, '.json');
+            if ($isJson && !in_array($head[0] ?? '', ['{', '['], true) && !str_starts_with($head, "\xEF\xBB\xBF")) {
+                $this->flashRedirect('/admin/migracja', 'Plik ' . $name . ' nie wygląda na JSON.', 'warn');
+            }
+            if (!move_uploaded_file((string)$f['tmp_name'], $dir . '/' . $name)) {
+                $this->flashRedirect('/admin/migracja', 'Nie można zapisać pliku ' . $name . '.', 'warn');
+            }
+            @chmod($dir . '/' . $name, 0640);
+            $n++;
+        }
+        $this->flashRedirect('/admin/migracja', $n ? 'Wgrano plików: ' . $n . '.' : 'Nie wybrano żadnego pliku.', $n ? 'ok' : 'warn');
+    }
+
+    /** Uruchamia import z wgranej paczki (kursy, kursanci albo wszystko) i generuje raport zgodności. */
+    public function migrationRun(Request $r): void
+    {
+        $this->admin();
+        @set_time_limit(600);
+        $only = in_array($r->str('only'), ['courses', 'users'], true) ? $r->str('only') : 'all';
+        $dir = $this->packageDir();
+        $imp = new \App\Migration\PubligoImporter($dir, ['only' => $only]);
+        try {
+            $res = $imp->run();
+            $files = \App\Migration\Report::generate($dir, $res['issues'], Config::storage('reports'));
+        } catch (\Throwable $e) {
+            $this->flashRedirect('/admin/migracja', 'Import nie powiódł się: ' . $e->getMessage(), 'warn');
+        }
+        $s = $res['stats'];
+        $msg = 'Import zakończony (' . $s['seconds'] . ' s).';
+        if (isset($s['courses_new'])) {
+            $msg .= ' Kursy: ' . $s['courses_new'] . ' nowych, ' . $s['courses_existing'] . ' już było.';
+        }
+        if (isset($s['users_source_rows'])) {
+            $msg .= ' Konta w pliku: ' . nf($s['users_source_rows']) . '; przypisania w pliku: ' . nf($s['enroll_source_rows'] ?? 0) . '.';
+        }
+        \App\Security::log('migration_import', (int)\App\Session::user()['id'], null, $r->ip(), $only);
+        $this->flashRedirect('/admin/migracja', $msg . ' Raport zgodności jest poniżej.');
+    }
+
+    public function migrationDelete(Request $r): void
+    {
+        $this->admin();
+        $dir = $this->packageDir();
+        foreach (\App\Migration\PubligoImporter::requiredFiles() as $name) {
+            @unlink($dir . '/' . $name);
+        }
+        $this->flashRedirect('/admin/migracja', 'Usunięto pliki paczki z serwera.');
     }
 
     public function report(Request $r): void

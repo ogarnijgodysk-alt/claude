@@ -1,0 +1,104 @@
+<!--
+  Nowy skrypt do strony sprzedażowej „Done For You: AI Creator” (aivirtualmodelagency.com).
+  Zamień nim cały ostatni blok <script> … </script> w kodzie strony (ten przed „END”).
+
+  Co się zmienia względem starego skryptu:
+  - CHECKOUT_URL nie trzeba już wpisywać – przyciski prowadzą do kasy Stripe przez wtyczkę Lejek.
+  - CAPACITY i SPOTS_LEFT znikają – licznik miejsc liczy się sam z prawdziwych zamówień w tym miesiącu.
+  - Gdy miejsca się skończą, przyciski zmienią się na „Reserve a <następny miesiąc> Spot” i sprzedają
+    miejsce na kolejny miesiąc (jeśli w produkcie zostawisz włączone rezerwacje).
+-->
+<script>
+(function () {
+  // 1. PRODUKT WE WTYCZCE LEJEK (Lejek → Produkty → pole „Adres w linku”)
+  var PRODUCT = 'ai-creator';
+  var CHECKOUT_URL = '/?lejek_checkout=' + PRODUCT;
+
+  // 2. WIDEO ZALOZYCIELA I WIDEO Z WYNIKAMI (bez zmian)
+  var FOUNDER_VIMEO_URL = 'https://vimeo.com/1248374281/609b19d4be';
+  var FOUNDER_VIDEO_VERTICAL = true;
+  var RESULTS_VIMEO_URL = 'https://vimeo.com/1248383531/8f71c6a3d5';
+  var RESULTS_VIDEO_VERTICAL = true;
+
+  var PRICE = 47;
+
+  // InitiateCheckout przy kliknięciu. Zdarzenie Purchase wysyła wtyczka na stronie podziękowania.
+  var ctas = document.querySelectorAll('.aimp .aimp-cta');
+  ctas.forEach(function (a) {
+    a.setAttribute('href', CHECKOUT_URL);
+    a.addEventListener('click', function () {
+      if (typeof fbq === 'function') {
+        fbq('track', 'InitiateCheckout', { value: PRICE, currency: 'USD' });
+      }
+    });
+  });
+
+  // Wideo z Vimeo (zalozyciel + wyniki)
+  function mountVimeo(url, boxId, vertical) {
+    var m = url.match(/vimeo\.com\/(?:video\/)?(\d+)(?:\/([0-9a-z]+))?/i);
+    var box = document.getElementById(boxId);
+    if (!m || !box) { return; }
+    var h = m[2] || (url.match(/[?&]h=([0-9a-z]+)/i) || [])[1];
+    box.querySelector('iframe').src =
+      'https://player.vimeo.com/video/' + m[1] + '?' + (h ? 'h=' + h + '&' : '') + 'title=0&byline=0&portrait=0';
+    if (vertical) { box.classList.add('vertical'); }
+    box.hidden = false;
+  }
+  mountVimeo(FOUNDER_VIMEO_URL, 'aimp-founder', FOUNDER_VIDEO_VERTICAL);
+  mountVimeo(RESULTS_VIMEO_URL, 'aimp-results', RESULTS_VIDEO_VERTICAL);
+
+  // Licznik miejsc z prawdziwych zamówień (wtyczka Lejek)
+  var tz = 'America/New_York';
+  var now = new Date();
+  var fmt = function (d) { return new Intl.DateTimeFormat('en-US', { month: 'long', timeZone: tz }).format(d); };
+  var thisMonth = fmt(now);
+  var nextMonth = fmt(new Date(now.getFullYear(), now.getMonth() + 1, 15));
+
+  function renderSpots(capacity, left) {
+    left = Math.max(0, Math.min(capacity, left));
+    document.querySelectorAll('.aimp [data-spots]').forEach(function (box) {
+      var l = box.querySelector('[data-spots-left]');
+      var bar = box.querySelector('[data-spots-bar]');
+      var note = box.querySelector('[data-spots-note]');
+      var cap = box.querySelector('.spots-top b');
+      if (cap) { cap.textContent = capacity + ' new clients'; }
+      bar.style.width = Math.round((capacity - left) / capacity * 100) + '%';
+      if (left > 0) {
+        l.textContent = left + (left === 1 ? ' spot left' : ' spots left');
+        note.textContent = 'Spots for ' + thisMonth + '. If checkout says “unavailable”, they’re gone.';
+      } else {
+        l.textContent = 'Full';
+        note.textContent = thisMonth + ' is full. Next spots open ' + nextMonth + ' 1.';
+      }
+    });
+    if (left === 0) {
+      ctas.forEach(function (a) {
+        if (a.firstChild && a.firstChild.nodeType === 3) {
+          a.firstChild.nodeValue = 'Reserve a ' + nextMonth + ' Spot — $' + PRICE;
+        }
+      });
+    }
+  }
+
+  function hideSpots() {
+    document.querySelectorAll('.aimp [data-spots]').forEach(function (box) { box.style.display = 'none'; });
+  }
+
+  fetch('/?rest_route=/lejek/v1/availability/' + PRODUCT, { cache: 'no-store' })
+    .then(function (r) { if (!r.ok) { throw new Error('HTTP ' + r.status); } return r.json(); })
+    .then(function (d) { if (!d.capacity) { hideSpots(); return; } renderSpots(d.capacity, d.left); })
+    .catch(hideSpots);
+
+  // Przycisk przyklejony do dolu na telefonie: pokazuje sie po przewinieciu za pierwszy przycisk
+  var sticky = document.getElementById('aimp-sticky');
+  var hero = document.getElementById('hero-cta');
+  if (sticky && hero && 'IntersectionObserver' in window) {
+    new IntersectionObserver(function (entries) {
+      entries.forEach(function (e) {
+        var pastHero = !e.isIntersecting && e.boundingClientRect.top < 0;
+        sticky.classList.toggle('show', pastHero);
+      });
+    }).observe(hero);
+  }
+})();
+</script>

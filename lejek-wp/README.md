@@ -12,8 +12,25 @@ Makieta całości: https://claude.ai/artifact/DRj7mReKv6QaAv3gy4k1WG
 - **Kasa Stripe**: link `/?lejek_checkout=adres-produktu` otwiera płatność Stripe (karta, Apple Pay, Google Pay,
   Link). Zbieramy telefon klienta, bo do niego dzwonicie. Karta zapisuje się w Stripe pod upsell jednym kliknięciem.
 - **Zamówienia na żywo** (Lejek → Zamówienia): lista odświeża się sama, powiadomienie w przeglądarce i e-mail
-  o każdym zamówieniu, statusy „do telefonu / po rozmowie / zrealizowane / zwrot”, notatki, zwrot przez Stripe
-  jednym przyciskiem, eksport CSV.
+  o każdym zamówieniu, statusy „do telefonu / po rozmowie / zrealizowane / zwrot”, notatki, eksport CSV.
+  Zwroty robi się w panelu Stripe; wtyczka sama oznacza wtedy zamówienie jako zwrot i zwalnia miejsce.
+
+## Klucz Stripe (Restricted key)
+
+Utwórz w Stripe klucz z ograniczonymi uprawnieniami, osobny dla każdej domeny, i ogranicz go do adresu IP
+serwera (adres znajdziesz w Stripe → Developers → Logs przy zapytaniu wysłanym przez wtyczkę).
+
+| Uprawnienie | Ustawienie |
+|---|---|
+| Checkout Sessions | Write |
+| Products | Write |
+| Prices | Write |
+| Balance | Read |
+| Payment Intents | Write – dopiero z upsellem |
+| Customers | Read – dopiero z upsellem |
+| Payment Methods | Read – dopiero z upsellem |
+
+Wszystko inne: None. Zwrotów (Refunds) wtyczka nie potrzebuje.
 - **Strona podziękowania**: krótki kod `[lejek_thankyou]`. Pokazuje zamówienie, wysyła zdarzenie Purchase
   do piksela Meta i oznacza zakup w Clarity.
 - **Statystyki** (Lejek → Statystyki): przychód, zamówienia, odwiedzający, konwersja, lejek (wejścia → kasa →

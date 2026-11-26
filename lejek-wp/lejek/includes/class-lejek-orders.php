@@ -9,7 +9,6 @@ class Lejek_Orders {
 	public static function init() {
 		add_action( 'rest_api_init', array( __CLASS__, 'routes' ) );
 		add_action( 'admin_post_lejek_order_update', array( __CLASS__, 'handle_update' ) );
-		add_action( 'admin_post_lejek_order_refund', array( __CLASS__, 'handle_refund' ) );
 		add_action( 'admin_post_lejek_orders_export', array( __CLASS__, 'handle_export' ) );
 	}
 
@@ -226,25 +225,6 @@ class Lejek_Orders {
 		exit;
 	}
 
-	public static function handle_refund() {
-		self::guard( 'lejek_order_refund' );
-		$id    = isset( $_POST['order'] ) ? absint( $_POST['order'] ) : 0;
-		$order = $id ? self::get( $id ) : null;
-		if ( ! $order || 'refunded' === $order->status || ! $order->stripe_payment_intent ) {
-			Lejek_Admin::flash( 'Tego zamówienia nie da się zwrócić.', 'error' );
-		} else {
-			$r = Lejek_Stripe::request( 'POST', 'refunds', array( 'payment_intent' => $order->stripe_payment_intent ), $order->mode, 'lejek-refund-' . $order->id );
-			if ( is_wp_error( $r ) ) {
-				Lejek_Admin::flash( 'Stripe odrzucił zwrot: ' . $r->get_error_message(), 'error' );
-			} else {
-				self::mark_refunded( $order->stripe_payment_intent, (int) $order->amount, (int) $order->amount, $order->currency );
-				Lejek_Admin::flash( 'Zwrot wykonany w Stripe. Pieniądze wrócą do klienta w ciągu kilku dni.', 'success' );
-			}
-		}
-		wp_safe_redirect( admin_url( 'admin.php?page=lejek-orders&order=' . $id ) );
-		exit;
-	}
-
 	public static function handle_export() {
 		self::guard( 'lejek_orders_export' );
 		global $wpdb;
@@ -423,14 +403,7 @@ class Lejek_Orders {
 							<textarea id="lejek-note" name="note" rows="6" class="large-text" placeholder="np. dzwoniliśmy 12:30, oddzwonić jutro"><?php echo esc_textarea( (string) $o->note ); ?></textarea></p>
 						<?php submit_button( 'Zapisz', 'primary', 'submit', false ); ?>
 					</form>
-					<?php if ( 'refunded' !== $o->status && $o->stripe_payment_intent ) : ?>
-						<form method="post" action="<?php echo esc_url( admin_url( 'admin-post.php' ) ); ?>" onsubmit="return confirm('Zwrócić klientowi całą kwotę przez Stripe? Tego nie da się cofnąć.');" class="lejek-refund">
-							<input type="hidden" name="action" value="lejek_order_refund">
-							<input type="hidden" name="order" value="<?php echo (int) $o->id; ?>">
-							<?php wp_nonce_field( 'lejek_order_refund' ); ?>
-							<button type="submit" class="button button-link-delete">Zwrot całej kwoty przez Stripe</button>
-						</form>
-					<?php endif; ?>
+					<p class="lejek-muted lejek-refund">Zwroty robisz w panelu Stripe (przycisk „Otwórz płatność w Stripe”). Wtyczka sama oznaczy wtedy zamówienie jako zwrot i zwolni miejsce.</p>
 				</div>
 			</div>
 		</div>

@@ -1,0 +1,30 @@
+welcome|Hi! Let's get you set up. Stand the phone upright, with the back camera facing you.
+not_visible|I can't see you yet. Please step in front of the camera.
+step_left|Please take a small step to your left.
+step_right|Please take a small step to your right.
+step_back|Please take a step back.
+come_closer|Please come a little closer.
+head_cut|Your head is cut off. Please take a step back.
+feet_cut|I can't see your feet. Please take a step back.
+raise_phone|Please raise the phone a little.
+lower_phone|Please lower the phone a little.
+straighten|Please straighten the phone.
+too_dark|It's a bit too dark. Please turn toward a window or a lamp.
+backlight|The light is behind you. Please face the light.
+hold_still|Great. Now hold still for a moment.
+ready_say_start|Perfect, you're in position. Say START when you're ready.
+say_start_again|Whenever you're ready, just say START.
+countdown|Recording in three, two, one.
+out_of_frame|You're out of the frame. Please step back in.
+start_over|Let's start this one over.
+min_reached|Great job. You can keep talking, or raise your hand to finish.
+all_done|All done. Thank you!
+next_full_body|Now let's record the full body shot. Please step back until I can see you from head to toe.
+q1|Introduce yourself. Who are you, and where are you from?
+q2|What do you do for work?
+q3|Tell me about a typical day for you.
+q4|What do you love most about your job?
+q5|What do you like to do on weekends?
+q6|Where would you love to travel next, and why?
+q7|Tell me about something you're proud of.
+q8|What are you looking forward to this year?
